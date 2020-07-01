@@ -12,12 +12,11 @@
         "build-all": "yarn clean && yarn build-node && yarn build-spa",
         "build-node": "babel fw -d lib && cp -r fw/devtools/views/ lib/devtools/views && cp -r fw/debug_views lib/debug_views",
         "build-watch": "babel fw -d lib --watch",
-        "build-spa": "cd ../semdoc4/ && yarn build && rm -rf ../genast/lib/semdoc_build && cp -r build/ ../genast/lib/semdoc_build"
+        "build-spa": "cd ../devtools_client/ && yarn build && rm -rf ../genast/lib/devtools_build && cp -r build/ ../genast/lib/devtools_build"
     },
     "main": "lib.js",
     "dependencies": {
         "@babel/preset-env": "^7.8.4",
-        "@vue/cli": "^4.2.3",
         "@vue/component-compiler-utils": "^3.1.1",
         "axios": "^0.19.2",
         "babel-jest": "^25.1.0",
