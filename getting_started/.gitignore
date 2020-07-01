@@ -2,4 +2,5 @@
 cache
 lib
 .env
+.idea
 yarn-error.log
