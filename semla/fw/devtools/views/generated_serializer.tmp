@@ -1,0 +1,12 @@
+import { registerSerializer } from 'genast'
+
+class <%= l.modelName %>Serializer {
+    async one(item, { add, addString }) {
+        addString('id')
+<% if (l.nestingParent) {%>
+        addString('<%= l.relationName %>_id')
+<% } %>
+    }
+}
+
+registerSerializer(<%= l.modelName %>Serializer)

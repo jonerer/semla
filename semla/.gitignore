@@ -1,0 +1,6 @@
+
+cache
+lib
+.env
+yarn-error.log
+.idea

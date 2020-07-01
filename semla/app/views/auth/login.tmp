@@ -1,0 +1,15 @@
+{include('layouts.header')}
+
+<form method="post" action="/auth/doregister">
+    <p>
+        <input type="text" name="name" placeholder="username">
+    </p>
+    <p>
+
+        <input type="password" name="password" placeholder="password">
+    </p>
+
+    <input type="submit">
+    </form>
+
+{include('layouts.footer')}

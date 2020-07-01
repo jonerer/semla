@@ -1,0 +1,66 @@
+import { BaseController } from './BaseController.js'
+import { registerController, requireParams } from 'genast'
+
+class <%= l.name %> extends BaseController {
+    static setup(m) {
+        m.before(['update', 'show', 'delete'], requireParams('<%= l.varNameSingular %>'))
+<% if (l.nestingParent) { %>
+        m.before(['create', 'index'], requireParams('<%= l.nestingParentParam %>'))
+<% } %>
+<% if (l.requiresAuth) { %>
+        m.before(this.requiresAuth) // assuming this is implemented in your BaseController
+<% } %>
+    }
+
+<%=
+ %>
+
+ <% console.log('nestingparent:', l.nestingParent, !!l.nestingParent) %>
+
+    async create({ <%=
+        l.nestingParent ? (l.nestingParentParam + ', ') : ''
+        %>params }) {
+        const <%= l.varNameSingular %> = new <%= l.modelName %>()
+        <%=
+            l.nestingParent
+                ? (l.varNameSingular + '.' + l.nestingParentParam + ' = ' + l.nestingParentParam)
+                : ''
+            %>
+        <%= l.varNameSingular %>.fill(params)
+        await <%= l.varNameSingular %>.save()
+
+        return this.json(<%= l.varNameSingular %>)
+    }
+
+    async update({ <%= l.varNameSingular %>, params }) {
+        <%= l.varNameSingular%>.fill(params)
+        await <%= l.varNameSingular %>.save()
+
+        return this.json(<%= l.varNameSingular %>)
+    }
+
+    async show({ <%= l.varNameSingular %> }) {
+        return this.json(<%= l.varNameSingular %>)
+    }
+
+    async index({ <%=
+    l.nestingParent ? l.nestingParentParam + ', ' : ''
+    %>json }) {
+        const <%= l.varNamePlural %> = await <%= l.modelName %>.find(<%=
+        l.nestingParent ? '[' + l.modelName + '.' + l.nestingParentParam + '_id, ' + l.nestingParentParam + '.id]'
+        : ''
+        %>)
+
+        return this.json(<%=  l.varNamePlural  %>)
+    }
+
+    async delete({ <%=  l.varNameSingular  %> }) {
+        await <%=  l.varNameSingular  %>.delete()
+
+        return this.json({
+            success: true
+        })
+    }
+}
+
+registerController(<%= l.name %>)

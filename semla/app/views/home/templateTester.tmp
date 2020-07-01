@@ -1,0 +1,27 @@
+
+
+hejsan
+
+/@
+
+function fibonacci(num) {
+    if (num <= 1) return 1;
+    
+    return fibonacci(num - 1) + fibonacci(num - 2);
+}
+
+function promiser() {
+    return new Promise(resolve => {
+        // for fun, return something from the params
+        resolve(ctx.params['qryVar'])
+    })
+}
+
+@/
+
+
+
+<div id="fiboutput">{fibonacci(5)}</div>
+<div id="promiseoutput">{promiser()}</div>
+<div id="localprom">{l.promval}</div>
+

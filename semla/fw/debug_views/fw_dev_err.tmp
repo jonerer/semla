@@ -1,0 +1,22 @@
+
+<h1>An error occurred while serving the request</h1>
+<div>Error message: {{ l.err.message }}</div>
+
+<div>
+    <pre>
+{{ l.err.stack }}
+    </pre>
+</div>
+
+<div>
+    <p>Here are the log lines produced for this request:</p>
+    @if (ctx._logLines)
+        @for (const line of ctx._logLines)
+            <div>
+            @for (const part of line)
+                {{ part }}
+            @end
+            </div>
+        @end
+    @end
+</div>

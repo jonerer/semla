@@ -1,0 +1,16 @@
+
+<html>
+<head>
+    <title>Gapp - sample app</title>
+</head>
+<body>
+
+<nav>
+    <a href="/auth/register">register</a>
+    <a href="/auth/login">log in</a>
+    <a href="/csrf">example csrf form</a>
+</nav>
+
+@if (ctx.req.query.hej) {
+    Hej indeed
+@}

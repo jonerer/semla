@@ -1,0 +1,21 @@
+
+Home-sidan. Some har en {l.variabel}!
+Alla users: {l.allUsers}
+
+<ul>
+@for (const user of await l.allUsers) {
+    @ const cat = await user.cat
+    @ const catname = (await user.cat)?.name
+        <li>
+            <a href="{userShow(user)}">
+                {user.name}
+            </a>
+            @if (await user.cat) {
+                Har katt!
+            @} else {
+                Har inte katt =/
+            @}
+            Katten också! {(await user.cat)?.name}
+        </li>
+@}
+</ul>

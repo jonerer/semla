@@ -1,0 +1,53 @@
+{
+    "name": "genast",
+    "version": "1.0.0",
+    "license": "MIT",
+    "scripts": {
+        "dev": "cross-env NODE_ENV=dev nodemon index.js",
+        "migrate": "node migrate.js",
+        "test": "jest --runInBand",
+        "test-watch": "jest --watch --runInBand",
+        "clean": "rm -rf lib",
+        "build-dev": "yarn clean && yarn build-all && yarn build-watch",
+        "build-all": "yarn clean && yarn build-node && yarn build-spa",
+        "build-node": "babel fw -d lib && cp -r fw/devtools/views/ lib/devtools/views && cp -r fw/debug_views lib/debug_views",
+        "build-watch": "babel fw -d lib --watch",
+        "build-spa": "cd ../semdoc4/ && yarn build && rm -rf ../genast/lib/semdoc_build && cp -r build/ ../genast/lib/semdoc_build"
+    },
+    "main": "lib.js",
+    "dependencies": {
+        "@babel/preset-env": "^7.8.4",
+        "@vue/cli": "^4.2.3",
+        "@vue/component-compiler-utils": "^3.1.1",
+        "axios": "^0.19.2",
+        "babel-jest": "^25.1.0",
+        "body-parser": "^1.19.0",
+        "cheerio": "^1.0.0-rc.3",
+        "chokidar": "^3.3.1",
+        "connect-pg-simple": "^6.1.0",
+        "cors": "^2.8.5",
+        "cross-env": "^7.0.2",
+        "dotenv": "^8.2.0",
+        "escape-html": "^1.0.3",
+        "esprima": "^4.0.1",
+        "execa": "^4.0.0",
+        "express": "^4.17.1",
+        "express-session": "^1.17.0",
+        "livereload": "^0.9.1",
+        "moment": "^2.24.0",
+        "parcel-bundler": "^1.12.4",
+        "pg": "^7.18.1",
+        "underscore": "^1.10.2",
+        "uuid": "^8.1.0",
+        "vue-hot-reload-api": "^2.3.4",
+        "vue-template-compiler": "^2.6.11"
+    },
+    "devDependencies": {
+        "@babel/cli": "^7.8.4",
+        "@babel/core": "^7.8.4",
+        "@babel/register": "^7.8.3",
+        "jest": "^25.1.0",
+        "nodemon": "^2.0.2",
+        "prettier": "^1.19.1"
+    }
+}

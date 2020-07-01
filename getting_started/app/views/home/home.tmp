@@ -1,0 +1,5 @@
+{{ include('layouts.header') }}
+
+Welcome to your new semla app!
+
+{{ include('layouts.footer') }}

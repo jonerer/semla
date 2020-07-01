@@ -1,0 +1,23 @@
+import { BaseModel } from './BaseModel.js'
+import { registerModel } from 'genast'
+
+class <%= l.name %> extends BaseModel {
+    static setup(m) {
+        // set up your relations and filters here
+<% if (l.nestingParent) { %>
+        m.belongsTo('<%= l.relationName %>')
+<% } %>
+        m.fillable([])
+
+        m.validate(v => {
+            // set up model validation here
+            // v.present('name')
+<% if (l.nestingParent) { %>
+            v.present('<%= l.relationName %>_id')
+<% } %>
+        })
+    }
+
+}
+
+registerModel(<%= l.name %>)

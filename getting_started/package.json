@@ -1,0 +1,29 @@
+{
+    "name": "genast",
+    "version": "1.0.0",
+    "license": "MIT",
+    "scripts": {
+        "dev": "cross-env NODE_ENV=dev nodemon index.js",
+        "migrate": "node migrate.js",
+        "test": "jest --runInBand",
+        "test-watch": "jest --watch --runInBand",
+        "build": "babel fw -d lib",
+        "build-spa": "node buildSpa.js"
+    },
+    "main": "index.js",
+    "dependencies": {
+        "@babel/preset-env": "^7.8.4",
+        "axios": "^0.19.2",
+        "babel-jest": "^25.1.0",
+        "body-parser": "^1.19.0",
+        "cross-env": "^7.0.2"
+    },
+    "devDependencies": {
+        "prettier": "^1.19.1",
+        "@babel/cli": "^7.8.4",
+        "@babel/core": "^7.8.4",
+        "@babel/register": "^7.8.3",
+        "jest": "^25.1.0",
+        "nodemon": "^2.0.2"
+    }
+}

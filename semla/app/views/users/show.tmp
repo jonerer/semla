@@ -1,0 +1,16 @@
+{include('layouts.header')}
+
+Visar en user :)
+
+<h2>
+    {l.user.name}
+</h2>
+
+@const cat = await l.user.cat
+@if (cat) {
+Has a cat! It's called {cat.name}
+@} else {
+Doesn't have a cat =/
+@}
+
+{include('layouts.footer')}

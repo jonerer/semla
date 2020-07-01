@@ -1,0 +1,11 @@
+
+Csrf page yo
+
+<form action="/csrf" method="post">
+    <input type="submit" value="without csrf">
+</form>
+
+<form action="/csrf" method="post">
+    {h.csrfTag()}
+    <input type="submit" value="with csrf">
+</form>

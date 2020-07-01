@@ -1,0 +1,11 @@
+<html>
+<head>
+    <title>Get started with Semla!</title>
+</head>
+
+<body>
+
+{{ h.content() }}
+
+</body>
+</html>

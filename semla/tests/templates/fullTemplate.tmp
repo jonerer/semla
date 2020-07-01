@@ -1,0 +1,8 @@
+<html>
+<head>
+    <title>En titel</title>
+</head>
+<body>
+En hello world. Aka: <%= ctx.myVar %>!
+</body>
+</html>
