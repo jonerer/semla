@@ -15,6 +15,8 @@ import Code from '../../shared/Code'
 const MigrationListItem = ({ migration }) => {
     const [open, setOpen] = useState(false)
 
+    const isErrored = !! migration.generationError
+
     return (
         <List.Item onClick={() => setOpen(!open)} style={{ cursor: 'pointer' }}>
             <Popup
@@ -30,9 +32,16 @@ const MigrationListItem = ({ migration }) => {
             </Popup>
             <List.Content>
                 {migration.name}
+                {isErrored && (
+                    <span style={{ color: 'red', fontWeight: 'bold', marginLeft: '100' }} title={migration.generationError}>ERROR</span>
+                )}
                 {open && (
                     <div>
-                        <Code content={migration.generated} lang={'sql'} />{' '}
+                        {isErrored ? (
+                            <Code content={migration.generationError} lang={'sql'} />
+                        ): (
+                            <Code content={migration.generated} lang={'sql'} />
+                        )}
                     </div>
                 )}
             </List.Content>

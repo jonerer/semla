@@ -1,19 +1,21 @@
 import { BaseModel } from './BaseModel.js'
-import { registerModel } from 'genast'
+import { registerModel } from 'semla'
 
 class <%= l.name %> extends BaseModel {
     static setup(m) {
-        // set up your relations and filters here
+        // set up your relations here
 <% if (l.nestingParent) { %>
         m.belongsTo('<%= l.relationName %>')
+<% } else { %>
+        // m.belongsTo('...')
 <% } %>
-        m.fillable([])
 
         m.validate(v => {
             // set up model validation here
-            // v.present('name')
 <% if (l.nestingParent) { %>
-            v.present('<%= l.relationName %>_id')
+            v.present('<%= l.relationName %>')
+<% } else { %>
+            // v.present([' ... '])
 <% } %>
         })
     }

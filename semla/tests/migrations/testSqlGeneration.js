@@ -105,7 +105,7 @@ test('Running raw sql', () => {
     expect(generatedDDL[1]).toBe('SELECT RAND() > 0.5')
 })
 
-const stmts = cls => {
+export const stmts = cls => {
     const migrator = new MigratorInput()
     const mInst = new cls()
 
@@ -130,4 +130,33 @@ test('Renaming a field', () => {
         `alter table users
 \trename column createdat to created_at;`
     )
+})
+
+class ExampleCreateAllFieldTypes {
+    change(m) {
+        m.addTable('users', t => {
+            t.boolean('hejsan')
+            t.bigint('biggus')
+            t.timestamptz('wut')
+            t.timestamps()
+        })
+    }
+}
+
+test('Add various field types to a new table', () => {
+const ddl = stmts(ExampleCreateAllFieldTypes)
+
+    expect(ddl[0]).toBe(`create table users
+(
+\tid bigserial not null
+\t\tconstraint users_id_pk
+\t\t\tprimary key,
+\thejsan boolean,
+\tbiggus bigint,
+\twut timestamptz,
+\tcreated_at timestamptz NOT NULL,
+\tupdated_at timestamptz
+);
+
+`)
 })

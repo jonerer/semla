@@ -1,5 +1,5 @@
 import { generateRoutes } from '../routes/routes'
-import { getController, runMiddleware } from '../controllers/setup'
+import { getController, runMiddleware, getControllers } from '../controllers/setup'
 import { Renderer } from '../view/render'
 import { getFwBasedir, isNonProd } from '../appinfo'
 import { getAuthenticatorForRoute } from '../authentication/authenticators'
@@ -91,11 +91,14 @@ export async function web(app) {
                 const controllerClass = getController(controllerName)
 
                 if (!controllerClass) {
+                    const controllerNames = getControllers().map(x => {
+                        return x.name
+                    }).join(',')
                     throw new Error(
                         'No controller called ' +
                             controllerName +
                             ' registered. There should be one for URL ' +
-                            route.path
+                            route.path + '. Available controllers: ' + controllerNames
                     )
                     return
                 }

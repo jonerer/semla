@@ -7,6 +7,7 @@ class DevMigrationSerializer {
             fullpath: item.fullpath,
             hasRun: item.hasRun,
             generated: item.generated,
+            generationError: item.generationError
         }
     }
 }

@@ -1,5 +1,5 @@
 import { BaseController } from './BaseController.js'
-import { registerController, requireParams } from 'genast'
+import { registerController, requireParams } from 'semla'
 
 class <%= l.name %> extends BaseController {
     static setup(m) {
@@ -26,14 +26,14 @@ class <%= l.name %> extends BaseController {
                 ? (l.varNameSingular + '.' + l.nestingParentParam + ' = ' + l.nestingParentParam)
                 : ''
             %>
-        <%= l.varNameSingular %>.fill(params)
+        // <%= l.varNameSingular %>.set(params.allow('...'))
         await <%= l.varNameSingular %>.save()
 
         return this.json(<%= l.varNameSingular %>)
     }
 
     async update({ <%= l.varNameSingular %>, params }) {
-        <%= l.varNameSingular%>.fill(params)
+        // <%= l.varNameSingular%>.set(params.allow('...'))
         await <%= l.varNameSingular %>.save()
 
         return this.json(<%= l.varNameSingular %>)

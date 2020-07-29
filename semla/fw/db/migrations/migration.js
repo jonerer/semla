@@ -79,6 +79,7 @@ export async function getMigrations(env) {
                 mf.generated = (await getStatements(migrCls)).join('\n')
             } catch (e) {
                 // probably the class has some syntax error or so
+                mf.generationError = e.toString()
             }
             migrs.push(mf)
         }

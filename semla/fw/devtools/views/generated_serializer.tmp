@@ -1,4 +1,4 @@
-import { registerSerializer } from 'genast'
+import { registerSerializer } from 'semla'
 
 class <%= l.modelName %>Serializer {
     async one(item, { add, addString }) {

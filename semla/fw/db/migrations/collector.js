@@ -43,6 +43,17 @@ class IntegerField extends MigrationField {
     }
 }
 
+class BigintField extends MigrationField {
+    constructor(name, options) {
+        super(name, options)
+        this.type = 'bigint'
+    }
+
+    ddl() {
+        return `${this.name} bigint${this.nullableString()}`
+    }
+}
+
 class TextField extends MigrationField {
     constructor(name, options) {
         super(name, options)
@@ -75,6 +86,10 @@ class MigratorTable {
             type: 'primary_key',
             name: 'id',
         })
+    }
+
+    bigint(name, options) {
+        this.fields.push(new BigintField(name, options))
     }
 
     text(name, options) {
@@ -129,6 +144,9 @@ class MigratorTable {
                     ddl += `\t${field.ddl()}`
                     break
                 case 'integer':
+                    ddl += `\t${field.ddl()}`
+                    break
+                case 'bigint':
                     ddl += `\t${field.ddl()}`
                     break
                 case 'timestamptz':
@@ -191,36 +209,63 @@ class FieldCollector {
     }
 }
 
+class DropColumnOperation {
+    constructor(tableName, name) {
+        this.tableName = tableName
+        this.name = name
+    }
+
+    ddl() {
+        return `alter table ${this.tableName}\n\tdrop column ${this.name};`
+    }
+}
+
+class RenameColumnOperation {
+    constructor(tableName, from, to) {
+        this.tableName = tableName
+        this.from = from
+        this.to = to
+    }
+
+    ddl() {
+        return `alter table ${this.tableName}\n\trename column ${op.from} to ${op.to};`
+    }
+}
+
 class AlterTable {
     constructor(table) {
         this.tableName = table
         this.field = null
 
-        this.renameOperations = []
+        this.operations = []
         this.add = new FieldCollector('add', table)
     }
 
     rename(from, to) {
-        this.renameOperations.push({ from, to })
+        this.operations.push(new RenameColumnOperation(this.tableName, from, to))
     }
 
-    generateRenamings() {
+    dropColumn(name) {
+        this.operations.push(new DropColumnOperation(this.tableName, name))
+    }
+
+    generateOperationDDLs() {
         let stmts = []
-        for (const op of this.renameOperations) {
+        for (const op of this.operations) {
             stmts.push(
-                `alter table ${this.tableName}\n\trename column ${op.from} to ${op.to};`
+                op.ddl()
             )
         }
         return stmts.join('\n').trim()
     }
 
     generateDDL() {
+        const opers = this.generateOperationDDLs()
         const addStmts = this.add.generateDDL()
-        const renameStmts = this.generateRenamings()
 
         let retval = ''
-        if (renameStmts !== '') {
-            retval += renameStmts
+        if (opers !== '') {
+            retval += opers
             if (addStmts !== '') {
                 retval += '\n'
             }
@@ -231,6 +276,17 @@ class AlterTable {
         }
 
         return retval
+    }
+}
+
+class RenameTable {
+    constructor(nameBefore, nameAfter) {
+        this._nameBefore = nameBefore
+        this._nameAfter = nameAfter
+    }
+
+    generateDDL() {
+        return 'alter table ' + this._nameBefore + ' rename to ' + this._nameAfter + ';'
     }
 }
 
@@ -251,6 +307,10 @@ export class MigratorInput {
         cb(table)
     }
 
+    renameTable(nameBefore, nameAfter) {
+        this.alterTables.push(new RenameTable(nameBefore, nameAfter))
+    }
+
     addTable(name, cb) {
         const table = new MigratorTable(name)
         this.tables.push(table)
@@ -264,7 +324,7 @@ export class MigratorInput {
             ddl += table.generateDDL() + '\n'
         }
         for (const adder of this.alterTables) {
-            ddl += adder.generateDDL()
+            ddl += adder.generateDDL() + '\n'
         }
 
         // then any queries

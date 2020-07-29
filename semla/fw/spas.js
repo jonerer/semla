@@ -73,7 +73,7 @@ export function startDevMode(app) {
     // register the dev tools spa to be hosted
     if (isNonProd() && get('devtools.enabled') && !get('fw.develop.devtools')) {
         // at this point, this file will be in genast/lib/ and the built devtools in genast/lib/semdoc_build
-        const ppath = path.join(__dirname, 'semdoc_build')
+        const ppath = path.join(__dirname, 'devtools_client_build')
         // log(ppath)
         app.use('/devtools', express.static(ppath))
         app.get('/devtools/*', (req, res) => {

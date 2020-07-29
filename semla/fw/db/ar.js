@@ -146,6 +146,8 @@ export const addARQueryThings = model => {
         }
     }
 
+
+
     model.prototype.save = async function(opts) {
         let retval = null
 
@@ -175,6 +177,27 @@ export const addARQueryThings = model => {
 
         const deletionSql = `DELETE FROM ${model._tableName} WHERE ID = $1`
         await query(deletionSql, [this.id])
+    }
+
+    model.fromSql = async function(sql, vars_or_options, options = {}) {
+        let vars = []
+        if (Array.isArray(vars_or_options)) {
+            vars = vars_or_options
+        } else if (typeof vars_or_options === 'object') {
+            options = vars_or_options
+        }
+
+        if (options.onlySql) {
+            return [sql, vars]
+        } else {
+            const data = await query(sql, vars)
+
+            let instantiated = []
+            for (const row of data.rows) {
+                instantiated.push(instantiateFromDbRow(model, row))
+            }
+            return instantiated
+        }
     }
 
     model.findOne = async (id, _opts) => {
