@@ -1,5 +1,5 @@
 import { singularize } from '../../utils'
-import { getLowercasedModel } from '../models'
+import { getLowercasedModel, ModelType } from '../models'
 
 export const jsifyFieldName = underscored_name => {
     let jsD = ''
@@ -31,13 +31,47 @@ export const dbIfyJsName = jsName => {
     return dbN
 }
 
+type FieldTypes = 'hasMany' | 'belongsTo' // should include the db fields like "TEXT"
+
 export class Field {
+    dbName: string
+    jsName: string
+    type: FieldTypes
+    relation: boolean
+    targetModel?: ModelType
+    model: ModelType
+    tsType: string
+
+    static typeStringToTsType(string) {
+        switch (string) {
+            case 'BOOL':
+                return 'boolean'
+            case 'BIGSERIAL':
+                return 'number'
+            case 'INTEGER':
+                return 'number'
+            case 'REAL':
+                return 'number'
+            case 'TEXT':
+                return 'string'
+            case 'VARCHAR':
+                return 'string'
+            case 'TIMESTAMP':
+                return 'Date'
+            case 'TIMESTAMPTZ':
+                return 'Date'
+            default:
+                throw new Error('Unknown type name ' + string)
+        }
+    }
+
     static FromDb(dbName, type) {
         const field = new Field()
         field.dbName = dbName
         field.jsName = field.jsIfy(dbName)
         field.type = type
         field.relation = false
+        field.tsType = Field.typeStringToTsType(type)
 
         return field
     }
@@ -98,8 +132,14 @@ export class Field {
 }
 
 export class Fields {
+    private all: Field[]
+
     constructor(arr) {
         this.all = arr
+    }
+
+    getAll() {
+        return this.all
     }
 
     dbFieldNames() {

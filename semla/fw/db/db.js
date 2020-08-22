@@ -4,7 +4,7 @@ import { DbError } from '../errors'
 
 const Pool = pg.Pool
 
-let pools = {}
+let pools = {} // one pool per env
 
 export function getPool(env) {
     env = env || envShortName()
@@ -12,7 +12,6 @@ export function getPool(env) {
 
     if (!pool) {
         const conf = get('database.' + env, {})
-        const all = get('')
 
         const connConf = {
             host: conf.host,

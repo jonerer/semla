@@ -29,6 +29,7 @@ import { initDevBundler } from './client/devbundler'
 import { hostStatic } from './static.js'
 import { initLiveReload } from './devtools/livereload'
 import { applyDefaultConfig } from './config/defaults'
+import { generateTypes } from './db/typegen'
 
 const log = console.log.bind(console)
 global.log = log
@@ -46,7 +47,7 @@ const setupEnv = () => {
 
     if (isNonProd()) {
         if (isNonTest()) {
-            console.log('Running in development mode, importing devtools')
+            // console.log('Running in development mode, importing devtools')
         }
         addAbsoluteImportDir(__dirname + '/devtools/controllers')
         addAbsoluteImportDir(__dirname + '/devtools/serializers')
@@ -68,12 +69,13 @@ const setupApp = app => {
     }
 }
 
-setupEnv()
 
 export async function load() {
+    setupEnv()
+
     if (isNonTest()) {
-        console.log(envShortName())
-        console.log('Loading files...')
+        // console.log(envShortName())
+        // console.log('Loading files...')
     }
     await loadAllFiles()
     if (isNonTest()) {
@@ -102,6 +104,8 @@ export async function start() {
         setupApp(app)
         await registerModelsAsQueryParams(app)
 
+        await generateTypes()
+
         app.use(bodyParser.json())
         app.use(bodyParser.urlencoded({ extended: true }))
 
@@ -115,7 +119,7 @@ export async function start() {
         fallbacks(app)
 
         return new Promise((resolve, reject) => {
-            const port = process.env.PORT || 8000
+            const port = config('port')
             const server = app.listen(port, () => {
                 if (isNonTest()) {
                     console.log('Running on port', port + ', have fun!')

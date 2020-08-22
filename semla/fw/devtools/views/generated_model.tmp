@@ -1,7 +1,6 @@
-import { BaseModel } from './BaseModel.js'
 import { registerModel } from 'semla'
 
-class <%= l.name %> extends BaseModel {
+export class <%= l.name %> {
     static setup(m) {
         // set up your relations here
 <% if (l.nestingParent) { %>

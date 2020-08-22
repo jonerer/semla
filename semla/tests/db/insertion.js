@@ -77,3 +77,28 @@ test('Inserting only some attributes', async () => {
 
     expect(insertValues[0]).toBe('ett')
 })
+
+// this is TODO!
+test('Inserting a dollar sign', async () => {
+    makeMock('example2s')
+    registerModel(Example2)
+
+    await prepareModels()
+
+    const ex = new Example2()
+    ex.set({
+        exampleField: 'ett$dollartecken',
+    })
+
+    throw new Error('this is todo! the params need to be escaped somehow.')
+
+    const [insertSql, insertValues] = await ex.save({
+        onlySql: true,
+    })
+
+    expect(insertSql).toBe(
+        'insert into example2s ("example_field", "created_at") VALUES ($1, $2) RETURNING *'
+    )
+
+    expect(insertValues[0]).toBe('ett')
+})

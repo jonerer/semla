@@ -1,11 +1,25 @@
 import { ValidationCollector } from '../validation/collection'
+import { ModelType } from '../models'
+
+export interface CollectedRelation {
+    type: 'belongsTo' | 'hasMany'
+    name: string,
+    options: any,
+    model: ModelType
+}
 
 export class ModelSetupCollector {
-    constructor(model) {
+    relations: CollectedRelation[]
+    fillable_fields: string[]
+    model: ModelType
+    validationCollector: ValidationCollector
+    _getFromParamCallback: (id: any) => string
+
+    constructor(model: ModelType) {
         this.relations = []
         this.fillable_fields = []
         this.model = model
-        this._getFromParamCallback = null
+        this._getFromParamCallback = id => model.findOne(id)
 
         this.validationCollector = new ValidationCollector()
     }

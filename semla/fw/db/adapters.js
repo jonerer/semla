@@ -1,4 +1,5 @@
 import { query } from './db'
+import chalk from 'chalk'
 
 export class DbAdapter {
     getModelTableMetadata() {
@@ -71,7 +72,7 @@ export class PostgresDbAdapter extends DbAdapter {
                 " couldn't load correctly! Probably it doesn't exist in the database. Nested error: " +
                     e.message
             )
-            console.warn('Probably you need to run migrations')
+            console.warn(chalk.black.bgRed('Probably you need to run migrations'))
             return []
         }
     }

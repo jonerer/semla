@@ -1,5 +1,5 @@
-require('@babel/register')
-const { start, setBasedir } = require('genast')
+require('@babel/register')({ extensions: ['.js', '.ts']})
+const { start, setBasedir } = require('semla')
 
 setBasedir(__dirname)
 start()

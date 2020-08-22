@@ -1,12 +1,14 @@
 import { findOneSql } from './utils'
 import { Field } from './fields'
-import { assureBucket, getLowercasedModel } from '../models'
+import { assureBucket, getLowercasedModel, ModelType } from '../models'
 import { QueryBuilder, QueryField } from './queryBuilder'
 import { jsFieldName, singularize } from '../../utils'
+import { CollectedRelation } from '../models/collector'
 
-const setupBelongsTo = (model, relation) => {
+const setupBelongsTo = (model: ModelType, relation: CollectedRelation) => {
     const field = Field.FromRelation(relation)
     // todo: this needs to be affected by the _id field
+    model._relationFields.push(field)
 
     // set up the instance field
     const jsName = field.jsName
@@ -16,6 +18,10 @@ const setupBelongsTo = (model, relation) => {
             const otherModel = field.targetModel
             const idVal = this._attributes[jsName + 'Id']
             const that = this
+
+            if (!otherModel) {
+                throw new Error('Target model not found for relation ' + model._modelName + '->' + relation.name)
+            }
 
             if (!idVal) {
                 return idVal
@@ -56,7 +62,7 @@ const setupBelongsTo = (model, relation) => {
                 this._attributes[idAttribute] = newVal
             } else {
                 throw new Error(
-                    `Invalid value for belongsTo field ${model.name}.${jsName}: ${newVal}. If it's a model instance, it hasn't been saved yet.`
+                    `Invalid value for belongsTo field ${model._modelName}.${jsName}: ${newVal}. If it's a model instance, it hasn't been saved yet.`
                 )
             }
 
@@ -74,9 +80,15 @@ const setupBelongsTo = (model, relation) => {
     })
 }
 
-const setupHasMany = (model, relation) => {
+const setupHasMany = (model: ModelType, relation: CollectedRelation) => {
     const field = Field.FromRelation(relation)
     const otherModel = field.targetModel
+
+    model._relationFields.push(field)
+
+    if (!otherModel) {
+        throw new Error('Target model not found for relation ' + model._modelName + '->' + relation.name)
+    }
 
     const jsName = jsFieldName(model._modelName) + 'Id'
 
@@ -107,7 +119,8 @@ const setupHasMany = (model, relation) => {
     })
 }
 
-export const setupRelations = model => {
+export const setupRelations = (model: ModelType) => {
+    model._relationFields = []
     for (const relation of model._setup.relations) {
         if (relation.type === 'belongsTo') {
             setupBelongsTo(model, relation)

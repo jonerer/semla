@@ -16,4 +16,8 @@ export function applyDefaultConfig() {
     addDefault('fw.requestlog.log_devrequests', false)
 
     addDefault('livereload.enabled', envShortName() === 'dev')
+
+    addDefault('codegen.models', envShortName() == 'dev') // only true for TS projects somehow?
+
+    addDefault('port', process.env.PORT || 8000)
 }

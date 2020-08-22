@@ -38,11 +38,7 @@ export const registerModelsAsQueryParams = async app => {
         app.param(model._routeParamName, async (req, res, next, id) => {
             let inst
             try {
-                if (getterParam) {
-                    inst = await getterParam(id)
-                } else {
-                    inst = await model.findOne(id)
-                }
+                inst = await getterParam(id)
             } catch (e) {
                 // wrong type or just nothing found
             }
@@ -83,7 +79,7 @@ export const getLowercasedModel = name => {
 
 const prepareFiller = model => {
     let fillableFields = model._setup.fillable_fields
-    let fillables = []
+    let fillables: string[] = []
     if (!Array.isArray(fillableFields)) {
         fillables = [fillableFields]
     } else {
@@ -169,7 +165,7 @@ export const prepareModels = async () => {
             return toRet
         }
 
-        const fields = []
+        const fields: Field[] = []
         // add getters and setters for the fields
 
         for (const rawField of metadataRes) {
@@ -211,7 +207,31 @@ export const prepareModels = async () => {
 
     await Promise.all(proms)
 }
-export const models = {}
+
+export interface ModelType {
+    _fields: Fields
+    _relationFields: Field[]
+    _modelName: string
+    prototype: any
+    _routeParamName: string
+    _setup: ModelSetupCollector
+    _tableName: string
+    _validations: ValidationCollector
+    _loaded: boolean
+    loaded(): boolean
+
+    // some AR things.
+    // note: these are not the AR types that the end-user will see
+    // just dummy typings that are good enough for framework-internal use
+    findOne(any): any
+    find(any): any
+}
+
+interface ModelsType {
+    [s: string]: ModelType
+}
+
+export const models: ModelsType = {}
 
 export function registerModel(model) {
     models[model.name] = model
@@ -220,6 +240,18 @@ export function registerModel(model) {
 export function clearModels() {
     // this exists just for testing
     Object.keys(models).forEach(x => delete models[x])
+}
+
+export function getUserModels(): ModelsType {
+    // filter out all models starting with 'dev'
+    const keys = Object.keys(models).filter(
+        x => !x.toLowerCase().startsWith('dev')
+    )
+    let newObj = {}
+    for (const key of keys) {
+        newObj[key] = models[key]
+    }
+    return newObj
 }
 
 export function getModels() {

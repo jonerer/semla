@@ -1,4 +1,4 @@
-import { registerRoutes } from 'genast'
+import { registerRoutes } from 'semla'
 
 export function routes(r) {
     r.get('', 'home@home')

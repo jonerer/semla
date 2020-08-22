@@ -1,7 +1,19 @@
 import { jsFieldName } from '../utils'
 
+interface DiContainerItemOptions {
+    name?: string
+    scope?: 'single' | 'request'
+}
+
 export class DiContainerItem {
-    constructor(thing, options = {}) {
+    private thing: any
+    private options: DiContainerItemOptions
+    private instance: null
+    private hasInstanced: boolean
+    private isClass: boolean
+    private diContainer?: DiContainer
+
+    constructor(thing, options: DiContainerItemOptions = {}) {
         this.thing = thing
         this.options = options
 
@@ -39,7 +51,7 @@ export class DiContainerItem {
         if (this.isClass) {
             if (this.getScope() === 'single') {
                 // check if someone else has put an instance in our container's bag
-                let singleInstanceBag = this.diContainer.singleInstanceBag
+                let singleInstanceBag = this.diContainer!.singleInstanceBag as DiInstanceBag
                 if (!singleInstanceBag.has(this.getName())) {
                     singleInstanceBag.set(
                         this.getName(),
@@ -72,6 +84,7 @@ export class DiContainerItem {
 }
 
 class DiInstanceBag {
+    private instances: {}
     constructor() {
         this.instances = {}
     }
@@ -87,9 +100,7 @@ class DiInstanceBag {
 }
 
 export class DiContainer {
-    constructor() {
-        this.singleInstanceBag = {}
-    }
+    singleInstanceBag?: DiInstanceBag
 
     setSingleInstanceBag(diInstanceBag) {
         this.singleInstanceBag = diInstanceBag
@@ -97,6 +108,13 @@ export class DiContainer {
 }
 
 export class DiContainerBuilder {
+    private items: {
+        thing: any,
+        options: DiContainerItemOptions
+    }[]
+    private scopeHierarchy: string[]
+    private singleInstanceBag: DiInstanceBag
+
     constructor() {
         this.items = [] // contains arrays of [thing, options]
         this.scopeHierarchy = ['single', 'request']
@@ -104,8 +122,8 @@ export class DiContainerBuilder {
         this.singleInstanceBag = new DiInstanceBag() // makes sure the "single" things are singletons *for this builder*, not neccesarily globally
     }
 
-    add(thing, options) {
-        this.items.push([thing, options]) //
+    add(thing, options: DiContainerItemOptions) {
+        this.items.push({thing, options})
     }
 
     // we want to add single items to the request container
@@ -136,14 +154,14 @@ export class DiContainerBuilder {
         })
     }
 
-    build(scope = 'single') {
+    build(scope = 'single'): DiContainer {
         // we actually have to build two di containers
         // one scoped to 'single' and one scoped to 'request'
         // (but only if the scope should be request)
 
-        let diItems = []
+        let diItems: DiContainerItem[] = []
         for (const item of this.items) {
-            const [thing, options] = item
+            const {thing, options} = item
             diItems.push(new DiContainerItem(thing, options))
         }
 

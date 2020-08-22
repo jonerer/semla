@@ -80,7 +80,8 @@ export function startDevMode(app) {
             res.sendFile(path.resolve(ppath, 'index.html'))
         })
         if (isNonTest()) {
-            console.log('Starting devtools at /devtools')
+            const port = get('port')
+            console.log(`Starting devtools at http://localhost:${port}/devtools`)
         }
     }
 }

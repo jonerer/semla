@@ -1,4 +1,4 @@
-import { registerInitializer } from 'genast'
+import { registerInitializer } from 'semla'
 
 const initDb = i => {
     i.addSettings('session.key', process.env.SESSION_KEY)

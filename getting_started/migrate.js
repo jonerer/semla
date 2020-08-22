@@ -1,4 +1,4 @@
 require('@babel/register')
 
-const migr = require('genast')
+const migr = require('semla')
 migr.runMigrations()

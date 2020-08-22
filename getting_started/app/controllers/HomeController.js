@@ -1,5 +1,5 @@
 import { BaseController } from './BaseController'
-import { registerController } from 'genast'
+import { registerController } from 'semla'
 
 class HomeController extends BaseController {
     async home({ render }) {

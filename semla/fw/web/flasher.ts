@@ -1,10 +1,20 @@
+interface Flash {
+    type: string,
+    text: string
+}
+
+interface Session { // because @types/express-session doesn't export it in a reasonable way...
+    flashes: Flash[]
+}
+
 export class Flasher {
+    private session: Session
     constructor(_session) {
         this.session = _session
     }
 
     flashes() {
-        let allFlashes = []
+        let allFlashes : Flash[] = []
         if (this.session.flashes) {
             allFlashes = [...this.session.flashes]
         }
@@ -23,12 +33,12 @@ export class Flasher {
             text = type
             type = 'info'
         }
-        let allFlashes = []
+        let allFlashes: Flash[] = []
         if (this.session.flashes) {
             allFlashes = [...this.session.flashes]
         }
 
-        allFlashes.push([type, text])
+        allFlashes.push({type, text})
 
         this.session.flashes = allFlashes
     }

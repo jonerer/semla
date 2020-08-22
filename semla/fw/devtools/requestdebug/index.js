@@ -22,7 +22,11 @@ class CtxDebugInfo {
                 query: this.req.query,
                 params: this.req.params,
             })
+            try {
             await r.save()
+            } catch(e) {
+                console.warn('Unable to log request. Error was: ' + e.toString())
+            }
             this.loggedRequest = r
         }
     }

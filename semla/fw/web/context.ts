@@ -7,6 +7,8 @@ import { injectLiveReload } from '../devtools/livereload'
 import get from '../config/config'
 import { Flasher } from './flasher'
 import { getRequestDiContainer } from '../di/web_di'
+import express from 'express'
+import { DiContainer } from '../di/container'
 
 const allow = (params, ...args) => {
     let fieldNames
@@ -34,10 +36,15 @@ const acceptsType = req => {
     return 'html'
 }
 
+type ResponderCallback = () => any
+
 class RespondCollector {
+    responseJson?: ResponderCallback
+    responseHtml?: ResponderCallback
+
     constructor() {
-        this.responseJson = null
-        this.responseHtml = null
+        this.responseJson = undefined
+        this.responseHtml = undefined
 
         this.json = this.json.bind(this)
         this.html = this.html.bind(this)
@@ -51,7 +58,7 @@ class RespondCollector {
         this.responseHtml = callback
     }
 
-    responderFor(type) {
+    responderFor(type): ResponderCallback {
         if (type === 'json' && this.responseJson) {
             return this.responseJson
         } else if (type === 'html' && this.responseHtml) {
@@ -60,13 +67,39 @@ class RespondCollector {
 
         if (this.responseHtml) {
             return this.responseHtml
-        } else {
+        } else if (this.responseJson) {
             return this.responseJson
+        } else {
+            throw new Error('Neither responsehtml or responsejson set')
         }
     }
 }
 
+interface Request extends express.Request {
+
+}
+
+interface Response extends express.Response {
+
+}
+
+interface ParamsThing {
+    allow(...args): object
+    [s: string]: any
+}
+
+type UserPrincipal = {}
+
 export class RequestContext {
+    flasher: Flasher
+    req: Request
+    res: Response
+    hasResponded: boolean
+    _currentUser?: UserPrincipal
+    _logLines: any[]
+    _requestLogger: (...args) => void
+    di: DiContainer
+
     constructor(req, res) {
         this.req = req
         this.res = res
@@ -78,13 +111,13 @@ export class RequestContext {
 
         this._logLines = []
 
-        this._currentUser = null
+        this._currentUser = undefined
 
         this._requestLogger = async (...args) => {
             console.log(...args)
 
             if (isNonProd()) {
-                let toSave = []
+                let toSave : any[] = []
                 for (const part of args) {
                     if (part == null) {
                         toSave.push(part)
@@ -192,8 +225,8 @@ export class RequestContext {
         return renderer
     }
 
-    get params() {
-        let toRet = {}
+    get params(): ParamsThing {
+        let toRet: any = {}
         if (this.req.params) {
             toRet = { ...toRet, ...this.req.params }
         }
@@ -204,7 +237,7 @@ export class RequestContext {
             toRet = { ...toRet, ...this.body }
         }
         toRet.allow = allow.bind(null, toRet)
-        return toRet
+        return toRet as ParamsThing
     }
 
     get rawJson() {

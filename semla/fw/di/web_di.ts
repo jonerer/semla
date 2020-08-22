@@ -1,4 +1,4 @@
-import { DiContainerBuilder } from './container'
+import { DiContainer, DiContainerBuilder } from './container'
 
 let webDiBuilder = new DiContainerBuilder()
 
@@ -10,7 +10,7 @@ export const getRequestDiBuilder = () => {
     return webDiBuilder
 }
 
-export const getRequestDiContainer = () => {
+export const getRequestDiContainer = (): DiContainer => {
     const inst = webDiBuilder.build('request')
     return inst
 }

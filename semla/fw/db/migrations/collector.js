@@ -220,6 +220,20 @@ class DropColumnOperation {
     }
 }
 
+/*
+class ChangeColumnType {
+    constructor(tableName, name, targetType) {
+        this.tableName = tableName
+        this.name = name
+        this.targetType = targetType
+    }
+
+    ddl() {
+        return `alter table ${this.tableName}\n\trename column ${op.from} to ${op.to};`
+    }
+}
+ */
+
 class RenameColumnOperation {
     constructor(tableName, from, to) {
         this.tableName = tableName
@@ -248,6 +262,12 @@ class AlterTable {
     dropColumn(name) {
         this.operations.push(new DropColumnOperation(this.tableName, name))
     }
+
+    /*
+    changeType(name, to) {
+        this.operations.push(new ChangeColumnType(this.tableName, name, to))
+    }
+     */
 
     generateOperationDDLs() {
         let stmts = []

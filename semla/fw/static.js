@@ -17,7 +17,7 @@ export const hostStatic = app => {
     const path = staticServePath()
     // log('weo', staticDir)
     if (fs.existsSync(staticDir)) {
-        log('hosting static!')
+        log('Hosting static media from ' + staticDir + ' at ' + path + '!')
         app.use(path, express.static(staticDir))
     }
 }
