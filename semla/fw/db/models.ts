@@ -196,6 +196,11 @@ export const prepareModels = async () => {
             Object.defineProperty(model, field.jsName + '__not', {
                 value: notQf,
             })
+
+            const ltQf = new QueryField(model, field, '<')
+            Object.defineProperty(model, field.jsName + '__lt', {
+                value: ltQf,
+            })
         }
         model._fields = new Fields(fields)
 

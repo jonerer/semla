@@ -64,7 +64,7 @@ export async function getMigrations(env) {
 
         for (const file of dir) {
             // const fullpath = './../' + basepath + '/' + file
-            if (!file.endsWith('.js')) {
+            if (!file.endsWith('.js') && !file.endsWith('.ts')) {
                 continue
             }
             const fullpath = path.join(basepath, file)

@@ -1,11 +1,13 @@
 interface Flash {
-    type: string,
+    type: flashTypes,
     text: string
 }
 
 interface Session { // because @types/express-session doesn't export it in a reasonable way...
     flashes: Flash[]
 }
+
+export type flashTypes = 'info' | 'error' | 'warn'
 
 export class Flasher {
     private session: Session
@@ -27,7 +29,7 @@ export class Flasher {
         })
     }
 
-    flash(type, text) {
+    flash(type: flashTypes, text: string) {
         if (!text) {
             // if no type is supplied, 'info' is default
             text = type

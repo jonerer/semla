@@ -82,7 +82,8 @@ test('altering a table to add a field', () => {
     expect(generatedDDL[0]).toBe(`alter table users
 \tadd cat_id int;
 alter table users
-\tadd mintext text;`)
+\tadd mintext text;
+`)
 })
 
 class ExampleSqlMigration {
@@ -128,7 +129,8 @@ test('Renaming a field', () => {
 
     expect(ddl[0]).toBe(
         `alter table users
-\trename column createdat to created_at;`
+\trename column createdat to created_at;
+`
     )
 })
 

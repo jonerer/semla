@@ -39,7 +39,9 @@ class DevModelsController {
             })
         }
 
-        this.json(toRet)
+        const resorted = sortBy(toRet, x => x.name)
+
+        this.json(resorted)
     }
 }
 

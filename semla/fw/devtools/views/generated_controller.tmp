@@ -1,4 +1,4 @@
-import { BaseController } from './BaseController.js'
+import { BaseController } from './BaseController'
 import { registerController, requireParams } from 'semla'
 
 class <%= l.name %> extends BaseController {

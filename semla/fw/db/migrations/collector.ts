@@ -1,4 +1,17 @@
-class MigrationField {
+interface FieldOptions {
+    null?: boolean
+    default?: any
+}
+
+interface TableObject {
+    name: string
+}
+
+abstract class MigrationField {
+    protected name: string
+    protected options?: FieldOptions
+    public type: string
+
     constructor(name, options) {
         this.name = name
         this.options = options
@@ -10,7 +23,10 @@ class MigrationField {
         }
         return ''
     }
+
+    abstract ddl(param: TableObject): any
 }
+
 
 class BoolField extends MigrationField {
     constructor(name, options) {
@@ -66,7 +82,7 @@ class TextField extends MigrationField {
 }
 
 class TimestamptzField extends MigrationField {
-    constructor(name, options) {
+    constructor(name, options?) {
         super(name, options)
         this.type = 'timestamptz'
     }
@@ -77,38 +93,55 @@ class TimestamptzField extends MigrationField {
     }
 }
 
+class PrimaryKeyField extends MigrationField {
+    constructor(name, options?) {
+        super(name, options)
+        this.type = 'primary_key'
+    }
+
+    ddl(table: MigratorTable) {
+        return `${this.name} bigserial not null
+\t\tconstraint ${table.name}_${this.name}_pk
+\t\t\tprimary key`
+    }
+}
+
 class MigratorTable {
-    constructor(name) {
+    private fields: MigrationField[]
+    public name: string
+
+    constructor(name: string) {
         this.fields = []
         this.name = name
 
-        this.fields.push({
-            type: 'primary_key',
-            name: 'id',
-        })
+        this.fields.push(new PrimaryKeyField('id'))
     }
 
-    bigint(name, options) {
+    integer(name, options?: FieldOptions) {
+        this.fields.push(new IntegerField(name, options))
+    }
+
+    bigint(name, options?: FieldOptions) {
         this.fields.push(new BigintField(name, options))
     }
 
-    text(name, options) {
+    text(name, options?: FieldOptions) {
         this.fields.push(new TextField(name, options))
     }
 
-    bool(name, options) {
+    bool(name, options?: FieldOptions) {
         this.fields.push(new BoolField(name, options))
     }
 
-    boolean(name, options) {
+    boolean(name, options?: FieldOptions) {
         return this.bool(name, options)
     }
 
-    timestamp(name, options) {
+    timestamp(name, options?: FieldOptions) {
         this.fields.push(new TimestamptzField(name, options))
     }
 
-    timestamptz(name, options) {
+    timestamptz(name, options?: FieldOptions) {
         this.fields.push(new TimestamptzField(name, options))
     }
 
@@ -122,37 +155,12 @@ class MigratorTable {
         this.fields.push(new TimestamptzField('updated_at'))
     }
 
-    integer(name, options) {
-        this.fields.push(new IntegerField(name, options))
-    }
-
     generateDDL() {
         let ddl = ''
         ddl += `create table ${this.name}\n(\n`
         let idx = 0
         for (const field of this.fields) {
-            switch (field.type) {
-                case 'primary_key':
-                    ddl += `\t${field.name} bigserial not null
-\t\tconstraint ${this.name}_${field.name}_pk
-\t\t\tprimary key`
-                    break
-                case 'text':
-                    ddl += `\t${field.ddl()}`
-                    break
-                case 'boolean':
-                    ddl += `\t${field.ddl()}`
-                    break
-                case 'integer':
-                    ddl += `\t${field.ddl()}`
-                    break
-                case 'bigint':
-                    ddl += `\t${field.ddl()}`
-                    break
-                case 'timestamptz':
-                    ddl += `\t${field.ddl()}`
-                    break
-            }
+            ddl += `\t${field.ddl(this)}`
             if (idx !== this.fields.length - 1) {
                 ddl += ','
             }
@@ -165,41 +173,48 @@ class MigratorTable {
 }
 
 class FieldCollector {
+    public type: any
+    tableName: any
+    fields: MigrationField[]
+
     constructor(type, tableName) {
         this.type = type
         this.fields = []
         this.tableName = tableName
     }
 
-    bool(name, opts) {
+    bool(name, opts: FieldOptions) {
         this.fields.push(new BoolField(name, opts))
     }
 
-    boolean(name, opts) {
+    boolean(name, opts: FieldOptions) {
         return this.bool(name, opts)
     }
 
-    text(name, opts) {
+    text(name, opts: FieldOptions) {
         this.fields.push(new TextField(name, opts))
     }
 
-    integer(name, opts) {
+    integer(name, opts: FieldOptions) {
         this.fields.push(new IntegerField(name, opts))
     }
 
-    timestamp(name, opts) {
+    timestamp(name, opts: FieldOptions) {
         this.fields.push(new TimestamptzField(name, opts))
     }
 
-    timestamptz(name, options) {
-        this.fields.push(new TimestamptzField(name, options))
+    timestamptz(name, opts: FieldOptions) {
+        this.fields.push(new TimestamptzField(name, opts))
     }
 
     generateDDL() {
         let toRet = ''
         let i = 0
+        const tableinfo = {
+            name: this.tableName
+        }
         for (const f of this.fields) {
-            toRet += `alter table ${this.tableName}\n\tadd ${f.ddl()};`
+            toRet += `alter table ${this.tableName}\n\tadd ${f.ddl(tableinfo)};`
             i++
             if (i !== this.fields.length) {
                 toRet += '\n'
@@ -209,9 +224,20 @@ class FieldCollector {
     }
 }
 
-class DropColumnOperation {
-    constructor(tableName, name) {
+abstract class TableOperation {
+    tableName: string
+
+    constructor(tableName) {
         this.tableName = tableName
+    }
+
+    abstract ddl()
+}
+
+class DropColumnOperation extends TableOperation {
+    private name: any
+    constructor(tableName, name) {
+        super(tableName)
         this.name = name
     }
 
@@ -234,19 +260,28 @@ class ChangeColumnType {
 }
  */
 
-class RenameColumnOperation {
+class RenameColumnOperation extends TableOperation {
+    private from: any
+    private to: any
+
     constructor(tableName, from, to) {
+        super(tableName)
         this.tableName = tableName
         this.from = from
         this.to = to
     }
 
     ddl() {
-        return `alter table ${this.tableName}\n\trename column ${op.from} to ${op.to};`
+        return `alter table ${this.tableName}\n\trename column ${this.from} to ${this.to};`
     }
 }
 
-class AlterTable {
+export class AlterTable {
+    private field: null
+    operations: TableOperation[]
+    add: FieldCollector
+    tableName: any
+
     constructor(table) {
         this.tableName = table
         this.field = null
@@ -270,7 +305,7 @@ class AlterTable {
      */
 
     generateOperationDDLs() {
-        let stmts = []
+        let stmts: string[] = []
         for (const op of this.operations) {
             stmts.push(
                 op.ddl()
@@ -279,7 +314,7 @@ class AlterTable {
         return stmts.join('\n').trim()
     }
 
-    generateDDL() {
+    ddl() {
         const opers = this.generateOperationDDLs()
         const addStmts = this.add.generateDDL()
 
@@ -299,18 +334,24 @@ class AlterTable {
     }
 }
 
-class RenameTable {
-    constructor(nameBefore, nameAfter) {
-        this._nameBefore = nameBefore
+class RenameTable extends TableOperation {
+    private _nameAfter: any
+
+    constructor(tableName, nameAfter) {
+        super(tableName)
         this._nameAfter = nameAfter
     }
 
-    generateDDL() {
-        return 'alter table ' + this._nameBefore + ' rename to ' + this._nameAfter + ';'
+    ddl() {
+        return 'alter table ' + this.tableName + ' rename to ' + this._nameAfter + ';'
     }
 }
 
 export class MigratorInput {
+    private rawQueries: string[]
+    private tables: any[]
+    private alterTables: TableOperation[]
+
     constructor() {
         this.tables = []
         this.alterTables = []
@@ -321,17 +362,17 @@ export class MigratorInput {
         this.rawQueries.push(text)
     }
 
-    alterTable(name, cb) {
+    alterTable(name, cb: (t: AlterTable) => void) {
         const table = new AlterTable(name)
         this.alterTables.push(table)
         cb(table)
     }
 
-    renameTable(nameBefore, nameAfter) {
+    renameTable(nameBefore: string, nameAfter: string) {
         this.alterTables.push(new RenameTable(nameBefore, nameAfter))
     }
 
-    addTable(name, cb) {
+    addTable(name, cb: (t: MigratorTable) => void) {
         const table = new MigratorTable(name)
         this.tables.push(table)
         cb(table)
@@ -344,11 +385,11 @@ export class MigratorInput {
             ddl += table.generateDDL() + '\n'
         }
         for (const adder of this.alterTables) {
-            ddl += adder.generateDDL() + '\n'
+            ddl += adder.ddl() + '\n'
         }
 
         // then any queries
-        let toRet = []
+        let toRet: string[] = []
         if (ddl !== '') {
             toRet.push(ddl)
         }

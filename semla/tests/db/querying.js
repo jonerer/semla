@@ -171,3 +171,17 @@ test('Should be able to pass in a param *after* a null-parameter', async () => {
         'SELECT e."id", e."example_field", e."created_at" FROM examples e WHERE e."example_field" IS NOT NULL  AND e."id" = $1'
     )
 })
+
+test('Should be able to "less than" queries', async () => {
+    const findOneSql = Example.where(Example.createdAt__lt, '2020-08-23')
+        .sql()[0]
+
+    expect(
+        findOneSql
+            .trim()
+            .split('\n')
+            .join(' ')
+    ).toBe(
+        'SELECT e."id", e."example_field", e."created_at" FROM examples e WHERE e."example_field" < $1'
+    )
+})

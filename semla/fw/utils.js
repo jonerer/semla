@@ -21,6 +21,9 @@ export const pluralize = thing => {
     if (thing.endsWith('f')) {
         return thing.substr(0, 3) + 'ves'
     }
+    if (thing.toLowerCase().endsWith('key')) {
+        return thing + 's'
+    }
     if (thing.endsWith('y')) {
         return thing.substr(0, thing.length - 1) + 'ies'
     }

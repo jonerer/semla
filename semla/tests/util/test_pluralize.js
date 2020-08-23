@@ -5,6 +5,8 @@ test('Make sure pluralize can handle common English word endings', () => {
     expect(pluralize('Category')).toBe('Categories')
     expect(pluralize('Person')).toBe('People')
     expect(pluralize('Leaf')).toBe('Leaves')
+    expect(pluralize('Key')).toBe('Keys')
+    expect(pluralize('TwoFactorKey')).toBe('TwoFactorKeys')
 })
 
 test('Make sure singularize can handle common English word endings', () => {
@@ -12,4 +14,5 @@ test('Make sure singularize can handle common English word endings', () => {
     expect(singularize('Categories')).toBe('Category')
     expect(singularize('People')).toBe('Person')
     expect(singularize('Leaves')).toBe('Leaf')
+    expect(singularize('Keys')).toBe('Key')
 })

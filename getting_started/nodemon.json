@@ -1,3 +1,4 @@
 {
-    "ignore": ["cache/**/*.js"]
+    "ignore": ["cache/**/*.js"],
+    "ext": "js,ts"
 }

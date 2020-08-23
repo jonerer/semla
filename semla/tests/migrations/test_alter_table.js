@@ -25,7 +25,8 @@ test('Adding a couple of fields, with options', () => {
     expect(generatedDDL[0]).toBe(`alter table posts
 \tadd category_id int NOT NULL;
 alter table posts
-\tadd published boolean NOT NULL DEFAULT false;`)
+\tadd published boolean NOT NULL DEFAULT false;
+`)
 })
 
 class ExampleTableRenaming {
