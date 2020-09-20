@@ -48,11 +48,8 @@ export class QueryField {
                 return nameToUse + ' IS NOT NULL '
             }
         } else {
-            if (this.operator === '=') {
-                return nameToUse + ' = $' + paramId
-            } else if (this.operator === '!=') {
-                return nameToUse + ' != $' + paramId
-            }
+            // make sure things targeting
+            return nameToUse + ' ' + this.operator + ' $' + paramId
         }
     }
 }

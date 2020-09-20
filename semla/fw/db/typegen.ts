@@ -23,9 +23,13 @@ const generateTypesContent = (models: ModelType[]) => {
     
     interface QueryField {}
     
+    interface RenderOptions {
+        layout?: string | null
+    }
+    
 export class SemlaController {
     // implementations are provided by the framework at runtime
-    render(view: string, locals?: object | undefined) {}
+    render(view: string, locals?: object | undefined, options?: RenderOptions) {}
     redirect(path: string) {}
     json(serializable: object) {}
 }
@@ -105,6 +109,10 @@ export interface RequestContext {
             }
             modelBody += 'static ' + field.jsName + ': QueryField\n\n'
             modelBody += 'static ' + field.jsName + '__not: QueryField\n\n'
+            modelBody += 'static ' + field.jsName + '__lt: QueryField\n\n'
+            modelBody += 'static ' + field.jsName + '__lte: QueryField\n\n'
+            modelBody += 'static ' + field.jsName + '__gt: QueryField\n\n'
+            modelBody += 'static ' + field.jsName + '__gte: QueryField\n\n'
         }
 
         const settableInterfaceName = model._modelName + 'Settable'

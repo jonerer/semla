@@ -30,6 +30,7 @@ import { hostStatic } from './static.js'
 import { initLiveReload } from './devtools/livereload'
 import { applyDefaultConfig } from './config/defaults'
 import { generateTypes } from './db/typegen'
+import { generateDescriptions } from './db/descriptiongen'
 
 const log = console.log.bind(console)
 global.log = log
@@ -105,6 +106,7 @@ export async function start() {
         await registerModelsAsQueryParams(app)
 
         await generateTypes()
+        await generateDescriptions()
 
         app.use(bodyParser.json())
         app.use(bodyParser.urlencoded({ extended: true }))

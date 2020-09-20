@@ -6,7 +6,7 @@
         "dev": "cross-env NODE_ENV=dev nodemon index.js",
         "migrate": "node migrate.js",
         "test": "jest --runInBand",
-        "test-watch": "jest --watch --runInBand",
+        "test-watch": "jest --watch --runInBand"
     },
     "main": "index.js",
     "dependencies": {

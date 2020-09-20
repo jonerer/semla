@@ -2,6 +2,7 @@ import { add, addDefault, envShortName } from './config'
 
 export function applyDefaultConfig() {
     add('routes.defaults.csrfProtection', true)
+    addDefault('cookies.active', true)
     addDefault('session.active', true)
     addDefault('session.store_db', false) // set to true to store sessions in DB (and to get the corresponding migration)
     if (envShortName() === 'dev') {
@@ -9,6 +10,8 @@ export function applyDefaultConfig() {
     } else {
         addDefault('spas.start_dev', false)
     }
+
+    addDefault('models.generate_description', false)
 
     addDefault('devtools.enabled', true)
     addDefault('fw.develop.devtools', false)

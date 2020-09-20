@@ -9,6 +9,7 @@ import { setupRelations } from './querying/relations'
 import { ValidationCollector } from './validation/collection'
 import { ModelSetupCollector } from './models/collector'
 import { addGlobal } from '../globals'
+import getCallerFile from 'get-caller-file';
 
 export const assureBucket = obj => {
     if (!obj._dirtyKeys) {
@@ -107,6 +108,40 @@ export const collectSetup = model => {
     model._setup = collector
 }
 
+const addQueryProperties = (model: ModelType, field: Field) => {
+    // attach User.id and the like, for querying purposes
+
+    const qf = new QueryField(model, field, '=')
+    Object.defineProperty(model, field.jsName, {
+        value: qf,
+    })
+
+    const notQf = new QueryField(model, field, '!=')
+    Object.defineProperty(model, field.jsName + '__not', {
+        value: notQf,
+    })
+
+    const ltQf = new QueryField(model, field, '<')
+    Object.defineProperty(model, field.jsName + '__lt', {
+        value: ltQf,
+    })
+
+    const lteQf = new QueryField(model, field, '<=')
+    Object.defineProperty(model, field.jsName + '__lte', {
+        value: lteQf,
+    })
+
+    const gtQf = new QueryField(model, field, '>')
+    Object.defineProperty(model, field.jsName + '__gt', {
+        value: gtQf,
+    })
+
+    const gteQf = new QueryField(model, field, '>=')
+    Object.defineProperty(model, field.jsName + '__gte', {
+        value: gteQf,
+    })
+}
+
 export const prepareModels = async () => {
     // let's load models into global scope
     for (const modelKey of Object.keys(models)) {
@@ -175,6 +210,8 @@ export const prepareModels = async () => {
             fields.push(field)
 
             Object.defineProperty(model.prototype, field.jsName, {
+                // for a database attribute "id", add the "id" thing to model instances
+
                 get: function() {
                     assureBucket(this)
                     return this._attributes[field.jsName]
@@ -186,21 +223,7 @@ export const prepareModels = async () => {
                 },
             })
 
-            // attach User.id and the like, for querying purposes
-            const qf = new QueryField(model, field, '=')
-            Object.defineProperty(model, field.jsName, {
-                value: qf,
-            })
-
-            const notQf = new QueryField(model, field, '!=')
-            Object.defineProperty(model, field.jsName + '__not', {
-                value: notQf,
-            })
-
-            const ltQf = new QueryField(model, field, '<')
-            Object.defineProperty(model, field.jsName + '__lt', {
-                value: ltQf,
-            })
+            addQueryProperties(model, field)
         }
         model._fields = new Fields(fields)
 
@@ -223,6 +246,7 @@ export interface ModelType {
     _tableName: string
     _validations: ValidationCollector
     _loaded: boolean
+    _registeringPath: string
     loaded(): boolean
 
     // some AR things.
@@ -239,6 +263,7 @@ interface ModelsType {
 export const models: ModelsType = {}
 
 export function registerModel(model) {
+    model._registeringPath = getCallerFile()
     models[model.name] = model
 }
 
@@ -257,6 +282,19 @@ export function getUserModels(): ModelsType {
         newObj[key] = models[key]
     }
     return newObj
+}
+
+export function getLoadedUserModelList(): ModelType[] {
+    const models = getUserModels()
+    let modelList: ModelType[] = []
+    let anyNotLoaded = false
+    for (const model of Object.values(models)) {
+        modelList.push(model)
+        if (!model.loaded()) {
+            anyNotLoaded = true
+        }
+    }
+    return modelList
 }
 
 export function getModels() {

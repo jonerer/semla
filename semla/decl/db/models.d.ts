@@ -18,6 +18,7 @@ export interface ModelType {
     _tableName: string;
     _validations: ValidationCollector;
     _loaded: boolean;
+    _registeringPath: string;
     loaded(): boolean;
     findOne(any: any): any;
     find(any: any): any;
@@ -29,5 +30,6 @@ export declare const models: ModelsType;
 export declare function registerModel(model: any): void;
 export declare function clearModels(): void;
 export declare function getUserModels(): ModelsType;
+export declare function getLoadedUserModelList(): ModelType[];
 export declare function getModels(): ModelsType;
 export {};

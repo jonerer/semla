@@ -11,6 +11,8 @@ import {
     initRequestLogger,
     loggedRequestRouted,
 } from '../devtools/requestdebug'
+import get from '../config/config'
+import cookieParser from 'cookie-parser'
 
 function add404Handler(app) {
     app.use(function(req, res, next) {
@@ -65,7 +67,20 @@ export function fallbacks(app) {
     addErrorCatcher(app)
 }
 
+function initCookieParser(app) {
+    if (get('cookies.active')) {
+        let secret = get('session.key')
+        if (!secret) {
+            throw new Error(
+                "You're using cookies, but haven't set a session.key."
+            )
+        }
+        app.use(cookieParser(secret))
+    }
+}
+
 export async function web(app) {
+    initCookieParser(app)
     await initSessionManagement(app)
     initRequestLogger(app)
 

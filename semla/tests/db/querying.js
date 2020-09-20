@@ -173,7 +173,7 @@ test('Should be able to pass in a param *after* a null-parameter', async () => {
 })
 
 test('Should be able to "less than" queries', async () => {
-    const findOneSql = Example.where(Example.createdAt__lt, '2020-08-23')
+    const findOneSql = Example.where(Example.exampleField__lt, '2020-08-23')
         .sql()[0]
 
     expect(
@@ -183,5 +183,47 @@ test('Should be able to "less than" queries', async () => {
             .join(' ')
     ).toBe(
         'SELECT e."id", e."example_field", e."created_at" FROM examples e WHERE e."example_field" < $1'
+    )
+})
+
+test('Should be able to "less than or equal" queries', async () => {
+    const findOneSql = Example.where(Example.exampleField__lte, '2020-08-23')
+        .sql()[0]
+
+    expect(
+        findOneSql
+            .trim()
+            .split('\n')
+            .join(' ')
+    ).toBe(
+        'SELECT e."id", e."example_field", e."created_at" FROM examples e WHERE e."example_field" <= $1'
+    )
+})
+
+test('Should be able to "greater than" queries', async () => {
+    const findOneSql = Example.where(Example.exampleField__gt, '2020-08-23')
+        .sql()[0]
+
+    expect(
+        findOneSql
+            .trim()
+            .split('\n')
+            .join(' ')
+    ).toBe(
+        'SELECT e."id", e."example_field", e."created_at" FROM examples e WHERE e."example_field" > $1'
+    )
+})
+
+test('Should be able to "greater than or equal" queries', async () => {
+    const findOneSql = Example.where(Example.exampleField__gte, '2020-08-23')
+        .sql()[0]
+
+    expect(
+        findOneSql
+            .trim()
+            .split('\n')
+            .join(' ')
+    ).toBe(
+        'SELECT e."id", e."example_field", e."created_at" FROM examples e WHERE e."example_field" >= $1'
     )
 })
