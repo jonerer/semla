@@ -32,12 +32,17 @@ import { applyDefaultConfig } from './config/defaults'
 import { generateTypes } from './db/typegen'
 import { generateDescriptions } from './db/descriptiongen'
 
+import debug from 'debug'
+
+const dbg = debug('semla:fw')
+
 const log = console.log.bind(console)
 global.log = log
 
 dotenv.config()
 
 const setupEnv = () => {
+    dbg('setting up env')
     if (!process.env.NODE_ENV) {
         process.env.NODE_ENV = 'development'
     }
@@ -96,15 +101,18 @@ export async function runMigrationsCli() {
 
 export async function start() {
     try {
+        dbg('loading')
         await load()
         await afterLoad()
 
+        dbg('prepare route helpers')
         await prepareRouteHelpers()
 
         const app = express()
         setupApp(app)
         await registerModelsAsQueryParams(app)
 
+        dbg('generate types and descriptions')
         await generateTypes()
         await generateDescriptions()
 
@@ -122,6 +130,7 @@ export async function start() {
 
         return new Promise((resolve, reject) => {
             const port = config('port')
+            dbg('starting to listen')
             const server = app.listen(port, () => {
                 if (isNonTest()) {
                     console.log('Running on port', port + ', have fun!')

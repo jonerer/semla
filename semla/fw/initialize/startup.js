@@ -1,6 +1,9 @@
 import { addItemToObject, add } from '../config/config'
 import { addAppDir } from '../loader'
 import { addToWebDi } from '../di/web_di'
+import debug from 'debug'
+
+const dbg = debug('semla:startup')
 
 class InitCollector {
     constructor() {
@@ -50,6 +53,7 @@ export function mergeSettings(collector) {
 let collector
 
 export function initialize() {
+    dbg('Running initializers')
     collector = collect()
 
     const settings = mergeSettings(collector)
@@ -65,6 +69,7 @@ export function initialize() {
 }
 
 export async function afterLoad() {
+    dbg('Run after load callbacks')
     for (const callback of collector.afterLoadCallbacks) {
         await callback()
     }

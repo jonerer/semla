@@ -1,6 +1,9 @@
 import path from 'path'
 import fs from 'fs'
 import { getRelativeImport } from './appinfo'
+import debug from 'debug'
+
+const dbg = debug('semla:loader')
 
 const loadInitDirs = ['app/init']
 
@@ -85,12 +88,14 @@ const allFilesToImport = async () => {
 export const loadAllFiles = async () => {
     const initFiles = await initFilesToImport()
     // log('Loading init file', initFiles)
+    dbg('Loading init files')
     await Promise.all(
         initFiles.map(file => {
             loadedFiles.push(file)
             return import(file)
         })
     )
+    dbg('Loading other app files')
     const files = await allFilesToImport()
     await Promise.all(
         files.map(file => {

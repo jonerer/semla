@@ -29,12 +29,12 @@ export function findStartEnd(
     if (tagLocation !== -1) {
         // if we have a tag, then find the location of the start of the tag line
         start = startOfLine(definingFile, tagLocation) // jump to before /*
-        end = definingFile.indexOf('*/', start)
+        end = definingFile.indexOf('*/', start) + 2 + 1
     } else {
         // if we don't have a tag, find the location of the line preceding the
         // class definition
         let classDefinitionLocation = definingFile.indexOf('class ' + model._modelName)
-        start = startOfLine(definingFile, classDefinitionLocation) - detectNewline.graceful(definingFile).length
+        start = startOfLine(definingFile, classDefinitionLocation) - detectNewline.graceful(definingFile).length + 1
         end = start
     }
     return {
@@ -44,7 +44,7 @@ export function findStartEnd(
 }
 
 export async function generateComment(model: ModelType, newlineChar: string) {
-    let cmt = `/** ${PRELUDE}` + newlineChar + newlineChar
+    let cmt = newlineChar + `/** ${PRELUDE}` + newlineChar + newlineChar
     for (const field of model._fields.getAll()) {
         cmt += `  * ${field.jsName}: ${field.dbName}: ${field.type}` + newlineChar
     }
@@ -64,21 +64,27 @@ export function insertComment(
     return result
 }
 
-async function descriptionGen(model: ModelType) {
-    const definingFile = await readFile(model._registeringPath, 'utf-8')
+export async function generateNewContent(contentBefore: string, model: ModelType) {
     // does the file have our comment tag? if so start at the start of that,
     // and end at the end of that
     // otherwise just put start and end by the class definition
 
-    const newlineChar = detectNewline.graceful(definingFile)
+    const newlineChar = detectNewline.graceful(contentBefore)
 
-    const { start, end } = await findStartEnd(definingFile, model)
+    const { start, end } = await findStartEnd(contentBefore, model)
     const content = await generateComment(model, newlineChar)
-    const inserted = await insertComment(definingFile, start, end, content)
+    const inserted = await insertComment(contentBefore, start, end, content)
+    return inserted
+}
+
+async function descriptionGen(model: ModelType) {
+    const definingFile = await readFile(model._registeringPath, 'utf-8')
+
+    const inserted = await generateNewContent(definingFile, model)
     const isSame = definingFile === inserted
     if (!isSame) {
         // write new contents
-        console.log('Should writing new comment on ', model._registeringPath, '!')
+        console.log(`Writing new comment for model in ${model._registeringPath}!`)
         await writeFile(model._registeringPath, inserted, 'utf-8')
     }
 
@@ -86,7 +92,6 @@ async function descriptionGen(model: ModelType) {
 }
 
 export const generateDescriptions = async () => {
-    // get all the models
     const generateDescriptions = get('models.generate_description')
 
     if (generateDescriptions) {

@@ -10,6 +10,9 @@ import { ValidationCollector } from './validation/collection'
 import { ModelSetupCollector } from './models/collector'
 import { addGlobal } from '../globals'
 import getCallerFile from 'get-caller-file';
+import debug from 'debug'
+
+const dbg = debug('semla:models')
 
 export const assureBucket = obj => {
     if (!obj._dirtyKeys) {
@@ -143,13 +146,16 @@ const addQueryProperties = (model: ModelType, field: Field) => {
 }
 
 export const prepareModels = async () => {
-    // let's load models into global scope
+    dbg('Run setup for models')
     for (const modelKey of Object.keys(models)) {
         const model = models[modelKey]
         collectSetup(model)
     }
 
-    const proms = Object.keys(models).map(async key => {
+    dbg(`Prepare ${Object.keys(models).length} models`)
+    const proms = Object.keys(models).map(async (key, idx) => {
+        const modelDbg = debug('semla:models:prepare_' + idx)
+        modelDbg(`Prepare model ${idx}: ${key}`)
         const model = models[key]
         model.prototype._modelName = key
         model._modelName = key
@@ -166,6 +172,7 @@ export const prepareModels = async () => {
 
         // load metadata
         model._loaded = false
+        modelDbg('Getting metadata from table, generating fields')
         const metadataRes = await dbAdapter.getModelTableMetadata(model)
         model._loaded = true
 
@@ -231,9 +238,11 @@ export const prepareModels = async () => {
         setupRelations(model)
 
         prepareFiller(model)
+        modelDbg(`Done`)
     })
 
     await Promise.all(proms)
+    dbg(`Model preparation done`)
 }
 
 export interface ModelType {
