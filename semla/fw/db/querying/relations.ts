@@ -9,6 +9,8 @@ const setupBelongsTo = (model: ModelType, relation: CollectedRelation) => {
     const field = Field.FromRelation(relation)
     // todo: this needs to be affected by the _id field
     model._relationFields.push(field)
+    // find the "id" field and assign this as a relation
+    model._fields.getByDbName(field.dbName)!.relationField = field
 
     // set up the instance field
     const jsName = field.jsName
@@ -20,7 +22,12 @@ const setupBelongsTo = (model: ModelType, relation: CollectedRelation) => {
             const that = this
 
             if (!otherModel) {
-                throw new Error('Target model not found for relation ' + model._modelName + '->' + relation.name)
+                throw new Error(
+                    'Target model not found for relation ' +
+                        model._modelName +
+                        '->' +
+                        relation.name
+                )
             }
 
             if (!idVal) {
@@ -87,7 +94,12 @@ const setupHasMany = (model: ModelType, relation: CollectedRelation) => {
     model._relationFields.push(field)
 
     if (!otherModel) {
-        throw new Error('Target model not found for relation ' + model._modelName + '->' + relation.name)
+        throw new Error(
+            'Target model not found for relation ' +
+                model._modelName +
+                '->' +
+                relation.name
+        )
     }
 
     const jsName = jsFieldName(model._modelName) + 'Id'
@@ -121,11 +133,15 @@ const setupHasMany = (model: ModelType, relation: CollectedRelation) => {
 
 export const setupRelations = (model: ModelType) => {
     model._relationFields = []
-    for (const relation of model._setup.relations) {
-        if (relation.type === 'belongsTo') {
-            setupBelongsTo(model, relation)
-        } else if (relation.type === 'hasMany') {
-            setupHasMany(model, relation)
+    try {
+        for (const relation of model._setup.relations) {
+            if (relation.type === 'belongsTo') {
+                setupBelongsTo(model, relation)
+            } else if (relation.type === 'hasMany') {
+                setupHasMany(model, relation)
+            }
         }
+    } catch (e) {
+        console.error('Failed setting up relations:', e)
     }
 }

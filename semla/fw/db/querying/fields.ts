@@ -41,6 +41,7 @@ export class Field {
     targetModel?: ModelType
     model: ModelType
     tsType: string
+    relationField?: Field
 
     static typeStringToTsType(string) {
         switch (string) {

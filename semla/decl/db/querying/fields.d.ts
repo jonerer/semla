@@ -10,7 +10,8 @@ export declare class Field {
     targetModel?: ModelType;
     model: ModelType;
     tsType: string;
-    static typeStringToTsType(string: any): "string" | "number" | "boolean" | "Date";
+    relationField?: Field;
+    static typeStringToTsType(string: any): "boolean" | "number" | "string" | "Date";
     static FromDb(dbName: any, type: any): Field;
     static FromRelation(relation: any): Field;
     jsIfy(dbName: any): string;
