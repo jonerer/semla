@@ -40,7 +40,8 @@ Semla builds on express.js, but adds some goodies for routing. Mainly to decreas
 typing and increase maintainability. It adds a controller layer to keep concerns
 common to specific domain objects together. Some QOL improvements have been included
 for instance, if you have a `User` model, then registering a `/users/:user/` path
-will automatically help the controller revsolve the linked User object.
+will automatically help the controller resolve the linked User object (along with
+TypeScript typings if so desired).
 
 ### Controllers
 Semla makes it easy for you to write the HTTP-interface layer, the controller.
