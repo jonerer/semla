@@ -11,8 +11,8 @@ Semla is a server-side Node.js web framework.
 Semla is an exploration into how ergonomic and powerful you could make an integrated
 omakase-style javascript server-side framework.
 
-Optimize for developer happiness. Happiness of course subjective; this is commonly
-understood in semla as "DRY", "keep magic to a minimum" and "maintain short
+We optimize for developer happiness. Happiness of course subjective; this is commonly
+understood in semla as "DRY", "keep magic to a minimum" and "provide a fast
 development speed".
 
 ### ORM
