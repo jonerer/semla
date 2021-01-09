@@ -24,7 +24,7 @@
         "@babel/preset-typescript": "^7.10.0",
         "@types/express-session": "^1.17.0",
         "@vue/component-compiler-utils": "^3.1.1",
-        "axios": "^0.19.2",
+        "axios": "^0.21.1",
         "babel-jest": "^25.1.0",
         "body-parser": "^1.19.0",
         "chalk": "^4.1.0",
