@@ -404,6 +404,7 @@ export default () => {
                             Create!
                         </Button>
                     </Form.Group>
+                    {/*
                     <Divider />
                     (optional) Changes:{' '}
                     {changes.map((change) => {
@@ -439,6 +440,7 @@ export default () => {
                             <Icon color={'green'} name={'edit'} /> alter table
                         </Button>
                     </Button.Group>
+                    */}
                 </Form>
             </Container>
         </div>

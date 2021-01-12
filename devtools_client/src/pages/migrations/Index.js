@@ -11,11 +11,12 @@ import {
     Segment,
 } from 'semantic-ui-react'
 import Code from '../../shared/Code'
+import { ErrorSegment } from '../../shared/ErrorSegment'
 
 const MigrationListItem = ({ migration }) => {
     const [open, setOpen] = useState(false)
 
-    const isErrored = !! migration.generationError
+    const isErrored = !!migration.generationError
 
     return (
         <List.Item onClick={() => setOpen(!open)} style={{ cursor: 'pointer' }}>
@@ -33,14 +34,15 @@ const MigrationListItem = ({ migration }) => {
             <List.Content>
                 {migration.name}
                 {isErrored && (
-                    <span style={{ color: 'red', fontWeight: 'bold', marginLeft: '100' }} title={migration.generationError}>ERROR</span>
+                    <span style={{ color: 'red', fontWeight: 'bold', marginLeft: '100' }}
+                          title={migration.generationError}>ERROR</span>
                 )}
                 {open && (
                     <div>
                         {isErrored ? (
-                            <Code content={migration.generationError} lang={'sql'} />
-                        ): (
-                            <Code content={migration.generated} lang={'sql'} />
+                            <Code content={migration.generationError} lang={'sql'}/>
+                        ) : (
+                            <Code content={migration.generated} lang={'sql'}/>
                         )}
                     </div>
                 )}
@@ -60,12 +62,13 @@ const MigrationStarter = ({ env }) => {
     useEffect(() => {
         const doit = async () => {
             let newVar = await Api.getMigrations(env)
+            setLoading(false)
             if (newVar.success === false) {
                 setError(newVar.message)
+            } else {
+                setMigrations(newVar)
+                setNumOutstanding(newVar.filter((x) => x.hasRun === false).length)
             }
-            setMigrations(newVar)
-            setNumOutstanding(newVar.filter((x) => x.hasRun === false).length)
-            setLoading(false)
         }
         doit()
     }, [env])
@@ -86,14 +89,19 @@ const MigrationStarter = ({ env }) => {
         }
     }
 
-    return (
-        <Segment loading={loading}>
+    if (error) {
+        return <Segment loading={loading}>
             {error && (
                 <Segment color={'red'}>
                     <Icon name={'warning'}></Icon>
                     Error: {error}
                 </Segment>
             )}
+        </Segment>
+    }
+
+    return (
+        <Segment loading={loading}>
             {numSuccessful > 0 && (
                 <Segment color={'red'}>
                     <Icon name={'warning'}></Icon>
@@ -121,13 +129,24 @@ const MigrationStarter = ({ env }) => {
 const MigrationListing = ({ env }) => {
     const [loading, setLoading] = useState(true)
     const [migrations, setMigrations] = useState([])
+    const [error, setError] = useState('')
 
     useEffect(() => {
         const doit = async () => {
-            setMigrations(await Api.getMigrations(env))
+            let newVar = await Api.getMigrations(env)
+            if (newVar.success === false) {
+                setError(newVar.message)
+            } else {
+                setMigrations(newVar)
+            }
         }
         doit()
     }, [env])
+
+    if (error) {
+        return <ErrorSegment error={error} />
+    }
+
     return (
         <List divided vertialAlign={'middle'}>
             {migrations.map((migration) => {
@@ -146,6 +165,7 @@ const IndexPage = () => {
     const [info, setInfo] = useState({})
     const [loading, setLoading] = useState(true)
     const [chosenEnv, setChosenEnv] = useState('')
+    const [error, setError] = useState('')
 
     const envs = ['dev', 'test']
 
@@ -160,15 +180,23 @@ const IndexPage = () => {
     useEffect(() => {
         const doit = async () => {
             let info = await Api.getServerInfo()
-            setInfo(info)
-            setChosenEnv(info.envShortName)
-            setLoading(false)
+            if (info.success === false) {
+                setError(info.message)
+            } else {
+                setInfo(info)
+                setChosenEnv(info.envShortName)
+                setLoading(false)
+            }
         }
         doit()
     }, [])
 
     if (loading) {
         return <div>Loading...</div>
+    }
+
+    if (error) {
+        return <ErrorSegment error={error} />
     }
 
     return (
@@ -190,8 +218,8 @@ const IndexPage = () => {
                     </Form.Group>
                 </Form>
 
-                <MigrationStarter env={chosenEnv} />
-                <MigrationListing env={chosenEnv} />
+                <MigrationStarter env={chosenEnv}/>
+                <MigrationListing env={chosenEnv}/>
             </Container>
         </div>
     )

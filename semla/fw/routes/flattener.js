@@ -7,6 +7,7 @@ export const getDefaultOptions = () => {
     return {
         csrfProtection: get('routes.defaults.csrfProtection'),
         session: get('session.active'),
+        meta: {}
     }
 }
 

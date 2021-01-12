@@ -25,9 +25,6 @@ export const hasSessionsTable = async () => {
         await query('select * from sessions')
         return true
     } catch (e) {
-        log(
-            "Database sessions are enabled, but the table isn't installed yet. You should run the migrations."
-        )
         return false
     }
 }

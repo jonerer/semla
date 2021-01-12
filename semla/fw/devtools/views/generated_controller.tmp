@@ -15,7 +15,6 @@ class <%= l.name %> extends BaseController {
 <%=
  %>
 
- <% console.log('nestingparent:', l.nestingParent, !!l.nestingParent) %>
 
     async create({ <%=
         l.nestingParent ? (l.nestingParentParam + ', ') : ''

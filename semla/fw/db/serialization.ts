@@ -21,7 +21,13 @@ export const registerSerializer = serializer => {
     serializers[normalized] = serializer
 }
 
-class SerializationCollector {
+// https://www.typescriptlang.org/docs/handbook/generics.html
+// https://www.typescriptlang.org/docs/handbook/advanced-types.html
+export class SerializerCollector<T> {
+    fieldsToResolve: string[]
+    objsGiven: {}
+    fieldsToStringify: string[]
+
     constructor() {
         this.fieldsToResolve = []
         this.objsGiven = {}
@@ -32,10 +38,11 @@ class SerializationCollector {
         this.addString = this.addString.bind(this)
     }
 
-    add(...args) {
+    add(...args: object[] | (keyof T)[]) {
         const obj = args[0]
         if (args.length > 1) {
             for (const o of args) {
+                // @ts-ignore
                 this.fieldsToResolve.push(o)
             }
         } else if (Array.isArray(obj)) {
@@ -44,27 +51,33 @@ class SerializationCollector {
             }
         } else if (typeof obj === 'object') {
             this.objsGiven = { ...this.objsGiven, ...obj }
+            /*
+            delete this?
         } else {
             // just one thing
             this.fieldsToResolve.push(obj)
+             */
         }
     }
 
-    addString(obj) {
+    addString(obj: keyof T | (keyof T)[]) {
+        // @ts-ignore
         this.add(obj)
 
         if (Array.isArray(obj)) {
             for (const item of obj) {
+                // @ts-ignore
                 this.fieldsToStringify.push(item)
             }
         } else {
+            // @ts-ignore
             this.fieldsToStringify.push(obj)
         }
     }
 }
 
 const resolveOne = async (instance, data) => {
-    const resolutionCollector = new SerializationCollector()
+    const resolutionCollector = new SerializerCollector()
     const oneResult = await instance.one(data, resolutionCollector)
     if (oneResult === undefined) {
         // if you return undefined, then we'll do the resolution via the collector
@@ -123,7 +136,7 @@ const findDefaultSerializerName = hej => {
     return serializerName
 }
 
-export const serialize = async (hej, desiredSerializer) => {
+export const serialize = async (hej, desiredSerializer?: string) => {
     if (hej && hej.then) {
         // if hej is a thenable, then let's resolve it first
         hej = await hej
@@ -136,7 +149,7 @@ export const serialize = async (hej, desiredSerializer) => {
         return hej
     }
 
-    let serializerToUse = null
+    let serializerToUse: null | any = null
     let needsSerializer = true
     if (desiredSerializer) {
         const splitted = desiredSerializer.toLowerCase().split('serializer')

@@ -41,7 +41,7 @@ class DevMigrationsController {
         if (run.numSuccessful) {
             setTimeout(() => {
                 console.log(
-                    'Migrations have been run. Stopping the server you can restart it (or models would be out of sync with database'
+                    'Migrations have been run. Stopping the server you can restart it (or models would be out of sync with database)'
                 )
 
                 process.exit(0)

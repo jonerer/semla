@@ -1,4 +1,4 @@
-import { MigratorInput } from '../../fw/db/migrations/collector'
+import { MigrationCollector } from '../../fw/db/migrations/collector'
 import { stmts } from './testSqlGeneration'
 
 class ExampleTableCreationMigration {
@@ -16,7 +16,7 @@ class ExampleTableCreationMigration {
 }
 
 test('Adding a couple of fields, with options', () => {
-    const migrator = new MigratorInput()
+    const migrator = new MigrationCollector()
     const mInst = new ExampleTableCreationMigration()
     mInst.change(migrator)
     const generatedDDL = migrator.generateStatements()
@@ -36,7 +36,7 @@ class ExampleTableRenaming {
 }
 
 test('renaming a table', () => {
-    const migrator = new MigratorInput()
+    const migrator = new MigrationCollector()
     const mInst = new ExampleTableRenaming()
     mInst.change(migrator)
     const generatedDDL = migrator.generateStatements()

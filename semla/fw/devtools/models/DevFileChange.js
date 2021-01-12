@@ -1,7 +1,7 @@
 import { registerModel } from '../../db/models'
 import { DevBaseModel } from './DevBaseModel'
 
-class DevFileChange extends DevBaseModel {
+export class DevFileChange extends DevBaseModel {
     static setup(m) {
         m.fillable(['text', 'path', 'applied'])
         m.validate(v => {

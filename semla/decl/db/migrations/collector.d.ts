@@ -13,7 +13,7 @@ declare abstract class MigrationField {
     nullableString(): "" | " NOT NULL";
     abstract ddl(param: TableObject): any;
 }
-declare class MigratorTable {
+export declare class MigratorTable {
     private fields;
     name: string;
     constructor(name: string);
@@ -56,7 +56,7 @@ export declare class AlterTable {
     generateOperationDDLs(): string;
     ddl(): string;
 }
-export declare class MigratorInput {
+export declare class MigrationCollector {
     private rawQueries;
     private tables;
     private alterTables;

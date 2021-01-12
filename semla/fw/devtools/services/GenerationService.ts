@@ -6,6 +6,7 @@ import { Renderer } from '../../view/render'
 import { getFwBasedir, isNonProd, getAppBasedir } from '../../appinfo'
 import { dbIfyJsName } from '../../db/querying/fields'
 import { prettierify } from './Prettierify'
+import { DevFileChange } from '../models/DevFileChange'
 
 const generationRenderer = () => {
     const r = new Renderer({
@@ -15,10 +16,10 @@ const generationRenderer = () => {
     return r
 }
 
-const generateModel = async ({ name, nestingParent }) => {
+const generateModel = async ({ name, nestingParent, variant }: GenerationInput) => {
     const errorRenderer = generationRenderer()
     const relationName = dbIfyJsName(nestingParent)
-    const result = await errorRenderer.render('generated_model', {
+    const result = await errorRenderer.render('generated_model_' + variant, {
         name,
         nestingParent,
         relationName,
@@ -49,46 +50,73 @@ const generateController = async ({
     return result.valueOf()
 }
 
-const generateSerializer = async ({ modelName, nestingParent }) => {
+const generateSerializer = async ({ name, nestingParent, variant }: GenerationInput) => {
     const errorRenderer = generationRenderer()
     const relationName = dbIfyJsName(nestingParent)
-    const result = await errorRenderer.render('generated_serializer', {
+    const result = await errorRenderer.render('generated_serializer_' + variant, {
         nestingParent,
         relationName,
-        modelName,
+        modelName: name,
     })
     return result.valueOf()
 }
 
+interface GeneratedFile {
+    text: string
+    path: string
+}
+
+export type Variants = 'js' | 'ts'
+
+interface GenerationInput {
+    name: string
+    nestingParent: string
+    requiresAuth: boolean
+    variant: Variants
+    noSave: boolean // this is for test runs without a database
+}
+
 export class GenerationService {
+    private changes: DevFileChange[]
+    
     constructor() {
         this.changes = []
     }
 
-    async generate(input) {
+    basePath() {
+        return getAppBasedir()
+    }
+
+    async generate(_input: GenerationInput) {
         // input contains name, potentially a "nestingParent" and a "requiresAuth" key
-        const { name: resourceName, nestingParent, requiresAuth } = input
-        const controllerName = pluralize(resourceName) + 'Controller'
-        const tableName = modelNameToTableName(resourceName)
+        let input = _input
+        input.variant = input.variant || 'js'
+
+        const extension = '.' + _input.variant
+
+        const controllerName = pluralize(input.name) + 'Controller'
+        const tableName = modelNameToTableName(input.name)
+
+        const { nestingParent, requiresAuth } = _input
 
         const basePath = getAppBasedir()
 
-        const ch = new DevFileChange()
-        ch.text = prettierify(
-            await generateModel({ name: resourceName, nestingParent })
-        )
-        ch.path = basePath + '/app/models/' + resourceName + '.js' // todo
+        const ch: any = new DevFileChange()
+        ch.text = prettierify(await generateModel(input))
+        ch.path = this.basePath() + '/app/models/' + input.name + extension
         ch.applied = false
         ch.applicable = true
+        if (!input.noSave) {
         await ch.save()
+        }
         this.changes.push(ch)
 
-        const cch = new DevFileChange()
+        const cch: any = new DevFileChange()
         cch.set({
             text: prettierify(
                 await generateController({
                     name: controllerName,
-                    modelName: resourceName,
+                    modelName: input.name,
                     nestingParent,
                     requiresAuth,
                 })
@@ -97,33 +125,33 @@ export class GenerationService {
             applied: false,
             applicable: true,
         })
-        await cch.save()
+        if (!input.noSave) {
+            await cch.save()
+        }
         this.changes.push(cch)
 
-        const csr = new DevFileChange()
-        const serializerName = resourceName + 'Serializer'
+        const csr: any = new DevFileChange()
+        const serializerName = input.name + 'Serializer'
         csr.set({
             text: prettierify(
-                await generateSerializer({
-                    modelName: resourceName,
-                    nestingParent,
-                })
+                await generateSerializer(input)
             ),
-            path: basePath + '/app/serializers/' + serializerName + '.js',
+            path: basePath + '/app/serializers/' + serializerName + '.' + input.variant,
             applied: false,
             applicable: true,
         })
-        await csr.save()
+            if (!input.noSave) {
+                await csr.save()
+            }
         this.changes.push(csr)
 
         // migration file. a bit more complex
-
-        // todo: handle nestedResource
         const mc = new MigrationCreationService()
+        mc.setVariant(input.variant)
         mc.name =
             moment().format('YYYY-MM-DD_HH-mm_') +
             'Create' +
-            pluralize(resourceName) +
+            pluralize(input.name) +
             'Table'
         mc.changes.push({
             type: 'createTable',
@@ -132,14 +160,16 @@ export class GenerationService {
 
         const migrationFile = mc.generateMigrationFile()
 
-        const mcs = new DevFileChange()
+        const mcs: any = new DevFileChange()
         mcs.set({
             text: migrationFile.contents,
-            path: basePath + '/app/db/migrations/' + migrationFile.name + '.js',
+            path: basePath + '/app/db/migrations/' + migrationFile.name + '.' + input.variant,
             applied: false,
             applicable: true,
         })
-        await mcs.save()
+            if (!input.noSave) {
+                await mcs.save()
+            }
         this.changes.push(mcs)
 
         // this.changes.push(mc)

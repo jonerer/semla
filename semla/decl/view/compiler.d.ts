@@ -2,7 +2,7 @@ export class TemplateCompiler {
     accumulator: string;
     result: string;
     index: number;
-    state: any;
+    state: number;
     expressionStart: string;
     expressionEnd: string;
     statementStart: string;

@@ -1,4 +1,4 @@
-import { MigratorInput } from '../../fw/db/migrations/collector'
+import { MigrationCollector } from '../../fw/db/migrations/collector'
 
 class ExampleTableCreationMigration {
     change(m) {
@@ -11,7 +11,7 @@ class ExampleTableCreationMigration {
 }
 
 test('Creation of a simple table with text and timestamps', () => {
-    const migrator = new MigratorInput()
+    const migrator = new MigrationCollector()
     const mInst = new ExampleTableCreationMigration()
     mInst.change(migrator)
     const generatedDDL = migrator.generateStatements()
@@ -42,7 +42,7 @@ class ExampleBooleansTable {
 }
 
 test('Creation of booleans', () => {
-    const migrator = new MigratorInput()
+    const migrator = new MigrationCollector()
     const mInst = new ExampleBooleansTable()
     mInst.change(migrator)
     const generatedDDL = migrator.generateStatements()
@@ -72,7 +72,7 @@ class ExampleTableAlteringMigration {
 }
 
 test('altering a table to add a field', () => {
-    const migrator = new MigratorInput()
+    const migrator = new MigrationCollector()
     const mInst = new ExampleTableAlteringMigration()
     mInst.change(migrator)
 
@@ -94,7 +94,7 @@ class ExampleSqlMigration {
 }
 
 test('Running raw sql', () => {
-    const migrator = new MigratorInput()
+    const migrator = new MigrationCollector()
     const mInst = new ExampleSqlMigration()
 
     mInst.change(migrator)
@@ -107,7 +107,7 @@ test('Running raw sql', () => {
 })
 
 export const stmts = cls => {
-    const migrator = new MigratorInput()
+    const migrator = new MigrationCollector()
     const mInst = new cls()
 
     mInst.change(migrator)

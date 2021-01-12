@@ -11,10 +11,11 @@ export class <%= l.name %> {
 
         m.validate(v => {
             // set up model validation here
+
 <% if (l.nestingParent) { %>
             v.present('<%= l.relationName %>')
 <% } else { %>
-            // v.present([' ... '])
+            // v.present(['...'])
 <% } %>
         })
     }

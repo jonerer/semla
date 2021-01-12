@@ -106,7 +106,7 @@ class PrimaryKeyField extends MigrationField {
     }
 }
 
-class MigratorTable {
+export class MigratorTable {
     private fields: MigrationField[]
     public name: string
 
@@ -347,7 +347,7 @@ class RenameTable extends TableOperation {
     }
 }
 
-export class MigratorInput {
+export class MigrationCollector {
     private rawQueries: string[]
     private tables: any[]
     private alterTables: TableOperation[]

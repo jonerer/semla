@@ -17,6 +17,8 @@ import ConfigList from './pages/ConfigList'
 import ModelList from './pages/ModelList'
 import LoggedRequests from './pages/LoggedRequests'
 import DbQuery, { DbQueryPage } from './pages/DbQuery'
+import Sidemenu from './shared/sidemenu'
+import styled from 'styled-components/macro'
 
 const DocRoutes = () => {
     return (
@@ -37,12 +39,23 @@ const DocRoutes = () => {
     )
 }
 
+const AppLayout = styled.div`
+        display: flex;
+`
+
+const PageContainer = styled.div`
+    padding: 20px 0px;
+`
+
 function App() {
     return (
-        <div className="App">
+        <AppLayout className="App">
             <Router basename="/devtools">
                 <Header />
 
+                <Sidemenu />
+
+                <PageContainer>
                 <Switch>
                     <Route path="/globals">
                         <Globals />
@@ -77,8 +90,9 @@ function App() {
 
                     <DocRoutes />
                 </Switch>
+                </PageContainer>
             </Router>
-        </div>
+        </AppLayout>
     )
 }
 

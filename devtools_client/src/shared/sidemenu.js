@@ -1,6 +1,11 @@
 import { Link } from 'react-router-dom'
 import React from 'react'
+import styled from 'styled-components/macro'
 
+const SidemenuContainer = styled.div`
+  padding: 20px 4px;
+  margin-right: 50px;
+`
 const Sidemenu = () => {
     const docLinks = {
         getting_started: {
@@ -15,7 +20,7 @@ const Sidemenu = () => {
         },
     }
     return (
-        <div>
+        <SidemenuContainer>
             <ul>
                 <h3>Docs</h3>
                 {Object.keys(docLinks).map((sectionKey) => {
@@ -66,7 +71,7 @@ const Sidemenu = () => {
                     <Link to={'/loader'}>Loader</Link>
                 </li>
             </ul>
-        </div>
+        </SidemenuContainer>
     )
 }
 export default Sidemenu

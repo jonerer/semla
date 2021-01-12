@@ -1,4 +1,4 @@
-import { Container, Icon, List, Table } from 'semantic-ui-react'
+import { Checkbox, Container, Icon, List, Table } from 'semantic-ui-react'
 import React, { useState, useEffect } from 'react'
 import Api from '../../utils/Api'
 
@@ -15,13 +15,17 @@ const ListItem = ({ route, controllers }) => {
         actionExists = contr.propertyNames.find((name) => name === route.action)
     }
 
+    console.log({route })
+
     return (
         <Table.Row>
             <Table.Cell>{route.method}</Table.Cell>
             <Table.Cell>
                 <a href={route.path}>{route.path}</a>
             </Table.Cell>
+            {/*
             <Table.Cell>{route.methodName}</Table.Cell>
+            */}
             <Table.Cell>
                 {route.controllerName} @ {route.action}
             </Table.Cell>
@@ -41,6 +45,11 @@ export default () => {
     const [loading, setLoading] = useState(true)
     const [routes, setRoutes] = useState([])
     const [controllers, setControllers] = useState([])
+    const [hideDevRoutes, setHideDevRoutes] = useState(
+        localStorage.getItem('devtoolsHideDevRoutes') === 'true' ||
+        localStorage.getItem('devtoolsHideDevRoutes') === null
+    )
+
 
     useEffect(() => {
         ;(async () => {
@@ -54,18 +63,30 @@ export default () => {
         return <div>Loading</div>
     }
 
+    const routesToShow = hideDevRoutes ? routes.filter(route => {
+        return !(route?.meta?.builtinDevRoute)
+    }) : routes
+
     return (
         <div>
             <Container>
                 <h2>These are the active routes in your application</h2>
+                <Checkbox toggle label={"Hide built-in development routes"} checked={hideDevRoutes}
+                onClick={() => {
+                    const newVal = !hideDevRoutes
+                    localStorage.setItem('devtoolsHideDevRoutes', newVal === true ? 'true' : 'false')
+                    setHideDevRoutes(newVal)
+                }}/>
                 <Table celled>
                     <Table.Header>
                         <Table.Row>
                             <Table.HeaderCell>Method</Table.HeaderCell>
                             <Table.HeaderCell>Path</Table.HeaderCell>
+                            {/*
                             <Table.HeaderCell>
                                 Path helper function name
                             </Table.HeaderCell>
+                            */}
                             <Table.HeaderCell>
                                 Controller action
                             </Table.HeaderCell>
@@ -74,7 +95,7 @@ export default () => {
                     </Table.Header>
 
                     <Table.Body>
-                        {routes.map((route) => {
+                        {routesToShow.map((route) => {
                             return (
                                 <ListItem
                                     key={route.method + route.path}

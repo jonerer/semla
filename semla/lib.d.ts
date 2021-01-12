@@ -1,4 +1,5 @@
-export { MigratorInput, AlterTable } from './decl/db/migrations/collector'
+export { AlterTable, MigratorTable } from './decl/db/migrations/collector'
+export { SerializerCollector } from './decl/db/serialization'
 export {
     registerModel,
     registerController,
@@ -8,4 +9,6 @@ export {
     registerRoutes,
     start,
     setBasedir,
+    ModelSetupCollector,
+    MigrationCollector
 } from './decl/fw'

@@ -1,5 +1,5 @@
 import express from 'express'
-import { prepareModels } from './db/models.js'
+import { prepareModels } from './db/models'
 import { registerModelsAsQueryParams } from './db/models'
 import * as bodyParser from 'body-parser'
 import { close } from './db/db'
@@ -15,6 +15,9 @@ export { requireParams } from './middlewares'
 import * as dotenv from 'dotenv'
 export { registerInitializer } from './initialize/startup'
 export { registerSerializer } from './db/serialization'
+
+export { ModelSetupCollector } from './db/models/collector'
+export { MigrationCollector } from './db/migrations/collector'
 
 import { loadAllFiles, addAbsoluteImportDir } from './loader'
 import cors from 'cors'

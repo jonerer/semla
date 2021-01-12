@@ -2,8 +2,12 @@ import path from 'path'
 import fs from 'fs'
 import { getAppBasedir } from '../../appinfo'
 import { prettierify } from './Prettierify'
+import { Variants } from './GenerationService'
 
 class MigrationFile {
+    name: any
+    contents: any
+
     constructor(name) {
         this.name = name
     }
@@ -14,9 +18,14 @@ class MigrationFile {
 }
 
 export class MigrationCreationService {
+    name: string
+    changes: any[]
+    private variant: Variants
+
     constructor() {
         this.name = ''
         this.changes = []
+        this.variant = 'js'
     }
     input(json) {
         this.name = json.name
@@ -27,12 +36,16 @@ export class MigrationCreationService {
         return name.split('-').join('')
     }
 
+    setVariant(string: Variants) {
+        this.variant = string
+    }
+
     write() {
         const basePath = getAppBasedir()
         const targetDir = basePath + '/app/db/migrations'
 
         const file = this.generateMigrationFile()
-        let filePath = path.join(targetDir, file.name + '.js')
+        let filePath = path.join(targetDir, file.name + '.' + this.variant)
         fs.writeFileSync(filePath, file.contents, 'utf-8')
     }
 
@@ -51,11 +64,21 @@ export class MigrationCreationService {
         const m = new MigrationFile(this.name)
 
         let conts = ''
+
+        if (this.variant === 'ts') {
+            conts += `import { MigrationCollector } from 'semla'\n\n`
+        }
+
         conts += `export default class Migration_${this.classify(
             // class names can't start with numbers, and can't contain -
             this.name
         )} {\n`
-        conts += `    change(m) {\n`
+
+        if (this.variant == 'js') {
+            conts += `    change(m) {\n`
+        } else {
+            conts += `    change(m: MigrationCollector) {\n`
+        }
 
         let i = 0
         for (const change of this.changes) {
@@ -70,7 +93,6 @@ export class MigrationCreationService {
                 conts += `            // make your changes here...\n`
                 conts += `        })\n`
             }
-            // viktigt :p
             if (i !== this.changes.length - 1) {
                 conts += '\n'
             }

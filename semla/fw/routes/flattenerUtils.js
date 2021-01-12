@@ -63,4 +63,8 @@ export class GeneratedRoute {
     csrfProtected() {
         return this.options.csrfProtection
     }
+
+    meta() {
+        return this.options.meta
+    }
 }

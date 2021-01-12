@@ -17,5 +17,5 @@ export declare class ModelSetupCollector {
     fillable(fields: any): void;
     getFromParam(callback: any): void;
     hasMany(name: any, options?: {}): void;
-    validate(callback: any): void;
+    validate(callback: (validations: ValidationCollector) => void): void;
 }

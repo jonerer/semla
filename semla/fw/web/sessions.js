@@ -25,6 +25,11 @@ export const initSessionManagement = async app => {
     if (get('session.active')) {
         const useDbStore = get('session.store_db')
         const hasTableInstalled = await hasSessionsTable()
+        if (useDbStore && !hasTableInstalled) {
+            log(
+                "Database sessions are enabled, but the table isn't installed yet. You should run the migrations."
+            )
+        }
 
         let store = undefined
         if (useDbStore && hasTableInstalled) {

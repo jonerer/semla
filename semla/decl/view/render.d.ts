@@ -2,6 +2,8 @@ export class Renderer {
     constructor(opts?: {});
     options: {};
     viewsDirectory: string;
+    viewCacheDirectory: string;
+    ensureHasCacheDirectory(): void;
     compile(targetFilePath: any, targetCachedFile: any): Promise<any>;
     setViewsDirectory(viewsDir: any): void;
     getTemplateFunction(name: any): Promise<any>;

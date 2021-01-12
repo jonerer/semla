@@ -85,3 +85,23 @@ test('Should be able to specify parameter name for routes', () => {
 
     expect(gen[2].path).toBe('/team_invites/:teaminvite')
 })
+
+function groupMeta(r) {
+    r.prefix('/example', r => {
+        r.get('/medmeta', 'us@ac')
+    }, {
+        meta: {
+            builtinDevRoute: true
+        }
+    })
+}
+
+test('Should be able to pass custom metadata for a prefix', () => {
+    registerRoutes(groupMeta)
+    const gen = generateRoutes()
+    clearRoutes()
+
+    expect(gen[0].meta()).toEqual({
+        builtinDevRoute: true
+    })
+})

@@ -41,6 +41,9 @@ const routes = r => {
         {
             session: false,
             csrfProtection: false,
+            meta: {
+                builtinDevRoute: true
+            }
         }
     )
 }

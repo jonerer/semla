@@ -5,6 +5,7 @@ class DevRoutesSerializer {
         add('path', 'method', 'controllerName', 'action')
         add({
             methodName: item.pathHelper.methodName,
+            meta: item.meta()
         })
     }
 }

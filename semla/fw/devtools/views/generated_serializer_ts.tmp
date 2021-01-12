@@ -1,0 +1,16 @@
+import { registerSerializer, SerializerCollector } from 'semla'
+import { <%= l.modelName %> } from '../models/<%= l.modelName %>'
+
+class <%= l.modelName %>Serializer {
+    async one(item, { add, addString }: SerializerCollector<<%= l.modelName %>>): Promise<object | void> {
+        // You can either use "add*" helpers, or just construct a json-izable object as you wish
+        // The helpers will resolve relations and run their respective serializers
+
+        addString('id')
+<% if (l.nestingParent) {%>
+        addString('<%= l.relationName %>_id')
+<% } %>
+    }
+}
+
+registerSerializer(<%= l.modelName %>Serializer)

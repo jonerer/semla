@@ -131,6 +131,8 @@ const GeneratePage = () => {
     const [nestingParent, setNestingParent] = useState('')
     const [requiresAuth, setRequiresAuth] = useState(false)
 
+    const [variantSelected, setVariantSelected] = useState('js')
+
     const [created, setCreated] = useState(false)
     const [creating, setCreating] = useState(false)
     const [error, setError] = useState(null)
@@ -158,11 +160,20 @@ const GeneratePage = () => {
         }
     }
 
+    const variantOptions = ['js', 'ts'].map(name => {
+        return {
+            key: name,
+            value: name,
+            text: name
+        }
+    })
+    /*
     const modelOptions = models.map((x) => ({
         key: x.name,
         value: x.name,
         text: x.name,
     }))
+     */
 
     const submit = async () => {
         const payload = {
@@ -170,6 +181,7 @@ const GeneratePage = () => {
             fullResource,
             nestingParent,
             requiresAuth,
+            variant: variantSelected
         }
 
         setCreating(true)
@@ -251,6 +263,23 @@ const GeneratePage = () => {
                         <Form.Group inline>
                             <Form.Field>
                                 <label>
+                                    Variant
+                                </label>
+                                <Dropdown
+                                    compact
+                                    selection
+                                    options={variantOptions}
+                                    value={variantSelected}
+                                    onChange={(e, { value }) =>
+                                        setVariantSelected(value)
+                                    }
+                                />
+                            </Form.Field>
+                        </Form.Group>
+                        {/*
+                        <Form.Group inline>
+                            <Form.Field>
+                                <label>
                                     If nested, which is the parent resource?
                                 </label>
                                 <Dropdown
@@ -265,6 +294,7 @@ const GeneratePage = () => {
                                 />
                             </Form.Field>
                         </Form.Group>
+                        */}
                         <Form.Group>
                             <Form.Field>
                                 <Checkbox

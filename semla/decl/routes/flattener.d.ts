@@ -1,6 +1,7 @@
 export function getDefaultOptions(): {
     csrfProtection: any;
     session: any;
+    meta: {};
 };
 export class RouteFlattener {
     path(myPath: any, recursePath: any): string;
@@ -11,6 +12,7 @@ export class RouteFlattener {
     getRoutes(collector: any, recursePath?: any[], parentOptions?: {
         csrfProtection: any;
         session: any;
+        meta: {};
     }): any;
     handleSemiNestedResources(item: any, recursePath: any, parentOptions: any): any;
 }

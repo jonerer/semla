@@ -11,6 +11,8 @@ class RouteItem {
         this.collector = null // for sub-routes like "resources" and "prefix"
 
         this.options = {}
+
+        this.meta = {}
     }
 }
 
@@ -37,6 +39,7 @@ export class RouteCollector {
         i.path = path
         i.actionstring = action
         i.options = options
+        i.meta = options.meta || {}
         this.items.push(i)
     }
 
@@ -49,6 +52,7 @@ export class RouteCollector {
         i.path = path
         i.actionstring = action
         i.options = options
+        i.meta = options.meta || {}
         this.items.push(i)
     }
 
@@ -60,6 +64,7 @@ export class RouteCollector {
         i.type = 'route'
         i.path = path
         i.actionstring = action
+        i.meta = options.meta || {}
         this.items.push(i)
     }
 
@@ -73,6 +78,7 @@ export class RouteCollector {
         i.path = path
         i.collector = subCollector
         i.options = options
+        i.meta = options.meta || {}
         this.items.push(i)
 
         let callback
@@ -97,6 +103,7 @@ export class RouteCollector {
         i.path = path
         i.collector = subCollector
         i.options = options
+        i.meta = options.meta || {}
         this.items.push(i)
 
         let callback
@@ -121,6 +128,7 @@ export class RouteCollector {
         i.path = path
         i.collector = subCollector
         i.options = options
+        i.meta = options.meta || {}
         this.items.push(i)
 
         let callback

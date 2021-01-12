@@ -12,3 +12,5 @@ export { setAppBasedir as setBasedir } from "./appinfo";
 export { requireParams } from "./middlewares";
 export { registerInitializer } from "./initialize/startup";
 export { registerSerializer } from "./db/serialization";
+export { ModelSetupCollector } from "./db/models/collector";
+export { MigrationCollector } from "./db/migrations/collector";

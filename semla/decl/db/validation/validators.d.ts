@@ -1,26 +1,30 @@
-export class PresentValidator {
+export interface Validator {
+    validate(instance: any, results: ResultsCollector): Promise<void>;
+}
+export declare type ValidationModes = 'update' | 'create';
+export declare class PresentValidator implements Validator {
+    private fields;
+    private options;
     constructor(_fieldNames: any, options: any);
-    fields: any[];
-    options: any;
     validate(instance: any, results: any): Promise<void>;
 }
-export class CustomValidator {
+export declare class CustomValidator implements Validator {
+    private callback;
+    private options;
     constructor(callback: any, options: any);
-    callback: any;
-    options: any;
     validate(instance: any, results: any): Promise<void>;
 }
-export class ValidationRunner {
+export declare class ResultsCollector {
+    private fails;
+    constructor();
+    fail(validator: Validator, fieldName: string, message: string): void;
+    isValid(): boolean;
+    messages(): string[];
+}
+export declare class ValidationRunner {
+    private instance;
+    private collector;
+    private mode;
     constructor(instance: any, collector: any, mode: any);
-    instance: any;
-    collector: any;
-    mode: any;
     validate(): Promise<ResultsCollector>;
 }
-declare class ResultsCollector {
-    fails: any[];
-    fail(validator: any, fieldName: any, message: any): void;
-    isValid(): boolean;
-    messages(): any[];
-}
-export {};

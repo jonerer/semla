@@ -1,0 +1,32 @@
+import { registerModel, ModelSetupCollector } from 'semla'
+
+<%
+const baseClassName = l.name + 'Base'
+%>
+// import { <%= baseClassName %> } from '../generated/types'
+
+export class <%= l.name %> /* extends <%= baseClassName %> */ {
+    // Uncomment class extension after the server has restarted and generated the type
+
+    static setup(m: ModelSetupCollector) {
+        // set up your relations here
+<% if (l.nestingParent) { %>
+        m.belongsTo('<%= l.relationName %>')
+<% } else { %>
+        // m.belongsTo('...')
+<% } %>
+
+        m.validate(v => {
+            // set up model validation here
+
+<% if (l.nestingParent) { %>
+            v.present('<%= l.relationName %>')
+<% } else { %>
+            // v.present(['...'])
+<% } %>
+        })
+    }
+
+}
+
+registerModel(<%= l.name %>)

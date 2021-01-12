@@ -21,4 +21,5 @@ export class GeneratedRoute {
     pathHelper: any;
     useSession(): any;
     csrfProtected(): any;
+    meta(): any;
 }

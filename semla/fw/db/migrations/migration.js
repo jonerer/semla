@@ -2,7 +2,7 @@ import fs from 'fs'
 import { query } from '../db.js'
 import { getAppBasedir, getAppMigrationsDir } from '../../appinfo'
 import path from 'path'
-import { MigratorInput } from './collector'
+import { MigrationCollector } from './collector'
 import { envShortName } from '../../config/config.js'
 import { DbError } from '../../errors.js'
 
@@ -97,7 +97,7 @@ export async function forceRunMigrationClass(cls) {
 export async function getStatements(cls) {
     const migrInst = new cls()
 
-    const migrator = new MigratorInput()
+    const migrator = new MigrationCollector()
     migrInst.change(migrator)
     const generatedStatements = migrator.generateStatements()
     return generatedStatements

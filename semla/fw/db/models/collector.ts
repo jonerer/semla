@@ -50,7 +50,7 @@ export class ModelSetupCollector {
         })
     }
 
-    validate(callback) {
+    validate(callback: (validations: ValidationCollector) => void) {
         callback(this.validationCollector)
     }
 }

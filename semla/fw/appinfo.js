@@ -18,7 +18,12 @@ export function getFwBasedir() {
 }
 
 export function getRelativeImport(from) {
-    return path.relative(from, appBasedir)
+    let relative = path.relative(from, appBasedir)
+    if (process.env.NODE_ENV === 'test') {
+        return '../' + relative // this is needed to make template loading work in jest env.
+        // todo: clean this up when the root cause has been found
+    }
+    return relative
 }
 
 export function getAppBasedir() {

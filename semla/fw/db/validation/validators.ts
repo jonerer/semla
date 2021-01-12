@@ -1,4 +1,15 @@
-export class PresentValidator {
+import { ValidationCollector } from './collection'
+
+export interface Validator {
+    validate(instance, results: ResultsCollector): Promise<void>
+}
+
+export type ValidationModes = 'update' | 'create'
+
+export class PresentValidator implements Validator {
+    private fields: any[]
+    private options: any
+    
     constructor(_fieldNames, options) {
         if (!Array.isArray(_fieldNames)) {
             this.fields = [_fieldNames]
@@ -17,7 +28,10 @@ export class PresentValidator {
     }
 }
 
-export class CustomValidator {
+export class CustomValidator implements Validator {
+    private callback: any
+    private options: any
+    
     constructor(callback, options) {
         this.callback = callback
         this.options = options
@@ -28,12 +42,20 @@ export class CustomValidator {
     }
 }
 
-class ResultsCollector {
+interface ValidationFailure {
+    validator: Validator
+    fieldName: string
+    message: string
+}
+
+export class ResultsCollector {
+    private fails: any[]
+    
     constructor() {
         this.fails = []
     }
 
-    fail(validator, fieldName, message) {
+    fail(validator: Validator, fieldName: string, message: string) {
         this.fails.push({
             validator,
             fieldName,
@@ -45,8 +67,8 @@ class ResultsCollector {
         return this.fails.length === 0
     }
 
-    messages() {
-        let toRet = []
+    messages(): string[] {
+        let toRet: string[] = []
         for (const fail of this.fails) {
             if (fail.fieldName) {
                 toRet.push(fail.fieldName + ': ' + fail.message)
@@ -59,6 +81,10 @@ class ResultsCollector {
 }
 
 export class ValidationRunner {
+    private instance: any
+    private collector: ValidationCollector
+    private mode: ValidationModes
+
     constructor(instance, collector, mode) {
         this.instance = instance
         this.collector = collector

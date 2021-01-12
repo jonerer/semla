@@ -6,6 +6,7 @@ import { getRelativeImport } from '../appinfo'
 import chokidar from 'chokidar'
 import url from 'url'
 import { reload } from '../devtools/livereload'
+import * as mkdirp from 'mkdirp'
 
 class RenderCache {
     static init() {
@@ -29,6 +30,16 @@ export class Renderer {
         this.options = opts
 
         this.viewsDirectory = './app/views'
+        this.viewCacheDirectory = './cache/views'
+
+        this.ensureHasCacheDirectory()
+    }
+
+    ensureHasCacheDirectory() {
+        const exists = fs.existsSync(this.viewCacheDirectory)
+        if (!exists) {
+            mkdirp.sync(this.viewCacheDirectory)
+        }
     }
 
     async compile(targetFilePath, targetCachedFile) {
@@ -49,16 +60,13 @@ export class Renderer {
             //join(getRelativeImport(__dirname), targetCachedFile)
         )
 
-        //console.log('abs:', abs)
         //const u = url.pathToFileURL(abs).href //.href.split('.')[0] // + '?cachebust=' + Math.random()
         //await import(u)
         // await import('file:///C:/prog/node/gapp/cache/views/home.js')
 
         const rel = path.join(getRelativeImport(__dirname), targetCachedFile)
-        //console.log('rel:', abs)
-        const u2 = rel // + '?cachebust=' + Math.random()
+        let u2 = rel // + '?cachebust=' + Math.random()
 
-        //console.log('loading ', u2)
         /*
         Note that we're deleting from the require cache, even though we're using "import" to import stuff.
         This is because babel transpiles stuff into a CJS module, and turns our import into a "require".
@@ -96,13 +104,12 @@ export class Renderer {
         const basename = basenameSplit[basenameSplit.length - 1]
 
         const viewDirectory = this.viewsDirectory + '/' + subdirs
-        const viewCacheDirectory = './cache/views'
 
         const rawViewFilename = basename + '.tmp'
-        const cacheDir = fs.readdirSync(viewCacheDirectory)
+        const cacheDir = fs.readdirSync(this.viewCacheDirectory)
 
         const cachedFilename = name + '.js'
-        const targetCachedFile = path.join(viewCacheDirectory, cachedFilename)
+        const targetCachedFile = path.join(this.viewCacheDirectory, cachedFilename)
 
         const targetTemplateDir = viewDirectory
         const targetFilePath = path.join(targetTemplateDir, rawViewFilename)
