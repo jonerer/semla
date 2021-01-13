@@ -10,7 +10,9 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: 12
-      - run: cd semla
-      - run: yarn
-      - run: yarn test
+      - name: Yarn deps and test
+        run: |
+          cd semla &&
+          yarn &&
+          yarn test
 
