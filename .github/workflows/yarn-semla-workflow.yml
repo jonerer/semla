@@ -14,5 +14,5 @@ jobs:
         run: |
           cd semla &&
           yarn &&
-          yarn test
+          yarn test-ci
 
