@@ -1,5 +1,6 @@
 import { isNonProd } from '../../appinfo'
 import get from '../../config/config'
+import { DevLoggedRequest } from '../models/DevLoggedRequest'
 
 class CtxDebugInfo {
     constructor(req) {
@@ -77,7 +78,7 @@ export function finishRequestLogging(req, response) {
 }
 
 export function isRequestDebugging() {
-    return isNonProd() && DevLoggedRequest.loaded()
+    return isNonProd() && DevLoggedRequest.loaded && DevLoggedRequest.loaded()
 }
 
 export async function addDebugInfo(req, type, info) {

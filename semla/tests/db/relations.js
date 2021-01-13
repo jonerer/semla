@@ -1,5 +1,4 @@
 import { forceRunMigrationClass } from '../../fw/db/migrations/migration'
-import Migration_20200220_1429_CreateTables from './testsetup/migrations/2020-02-20_14-29_CreateTestTables'
 import {
     clearModels,
     prepareModels,

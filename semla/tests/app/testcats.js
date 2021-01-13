@@ -1,4 +1,4 @@
-import { finish, post, get, startup } from './testutils'
+import { finish, post, get, startup } from '../app/testutils'
 
 beforeAll(async () => {
     return startup({

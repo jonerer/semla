@@ -1,3 +1,10 @@
+test('todo', () => {
+    expect(true).toBeTruthy()
+})
+
+/*
+
+TODO: Authenticators? Or leave that up to the user?
 import {
     clearRoutes,
     generateRoutes,
@@ -34,3 +41,4 @@ test('Should be able to cascade authenticators', () => {
     expect(gen[7].path.indexOf('cats')).not.toBe(-1)
     expect(gen[7].options.authenticator).toBe('jwt_res')
 })
+ */
