@@ -24,7 +24,7 @@ export class RouteCollector {
     validateOptions(opts) {
         const defaultOptions = getDefaultOptions()
         for (const key in opts) {
-            if (defaultOptions[key] === undefined) {
+            if (!Object.keys(defaultOptions).includes(key)) {
                 throw new Error('Route error: unknown option ' + key)
             }
         }

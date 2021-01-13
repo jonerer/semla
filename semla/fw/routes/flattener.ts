@@ -81,7 +81,7 @@ export class RouteFlattener {
     }
 
     handleResources(item, recursePath, parentOptions) {
-        let routes = []
+        let routes: GeneratedRoute[] = []
         const resourceName = item.path
         const controllerName = item.options.controller || item.path
         const paramName = this.paramNameFor(item)
@@ -195,11 +195,11 @@ export class RouteFlattener {
      */
     getRoutes(
         collector,
-        recursePath = [],
+        recursePath: string[] = [],
         parentOptions = getDefaultOptions()
-    ) {
+    ): GeneratedRoute[] {
         let items = collector.items
-        let routes = []
+        let routes: GeneratedRoute[] = []
 
         for (const item of items) {
             if (item.type === 'route') {
@@ -260,7 +260,7 @@ export class RouteFlattener {
 
     handleSemiNestedResources(item, recursePath, parentOptions) {
         // very similar to 'resources', except the get/update/delete paths aren't nested.
-        let routes = []
+        let routes: GeneratedRoute[] = []
 
         const resourceName = item.path
         const controllerName = item.options.controller || item.path

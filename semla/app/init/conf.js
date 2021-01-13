@@ -1,7 +1,7 @@
 import { registerInitializer } from '../../fw/fw'
 
 const initDb = i => {
-    i.addSettings('session.key', process.env.SESSION_KEY)
+    i.addSettings('session.key', 'random_session_key_for_tests')
 
     i.addSettings('fw.develop.devtools, true')
 

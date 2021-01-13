@@ -1,7 +1,8 @@
 import { RouteCollector } from './collector'
 import { RouteFlattener } from './flattener'
+import { GeneratedRoute } from './flattenerUtils'
 
-let routers = []
+let routers: any = []
 
 export function registerRoutes(routes) {
     routers.push(routes)
@@ -15,8 +16,8 @@ export function getRouters() {
     return routers
 }
 
-export function generateRoutes() {
-    let collectors = []
+export function generateRoutes(): GeneratedRoute[] {
+    let collectors: RouteCollector[] = []
     for (const router of routers) {
         const collector = new RouteCollector()
         router(collector)
@@ -24,7 +25,7 @@ export function generateRoutes() {
         collectors.push(collector)
     }
 
-    let toRet = []
+    let toRet: GeneratedRoute[] = []
     for (const collector of collectors) {
         const flattener = new RouteFlattener()
         const routes = flattener.getRoutes(collector)

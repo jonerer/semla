@@ -13,7 +13,7 @@ export function routes(r) {
                 controller: 'apiusers',
             })
         },
-        { authenticator: 'jwt' }
+        // { authenticator: 'jwt' }
     )
 
     r.prefix('auth', r => {
