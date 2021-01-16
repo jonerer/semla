@@ -159,12 +159,16 @@ async function descriptionGen(model: ModelType) {
     return true
 }
 
+export const modelsToGenerateDescriptionsFor = () => {
+    return getLoadedUserModelList()
+}
+
 export const generateDescriptions = async () => {
     const generateDescriptions = get('models.generate_description')
 
     if (generateDescriptions) {
         const proms: Promise<boolean>[] = []
-        const models = getLoadedUserModelList()
+        const models = modelsToGenerateDescriptionsFor()
         for (const model of models) {
             proms.push(descriptionGen(model))
         }

@@ -100,7 +100,8 @@ export class MockDbAdapter extends DbAdapter {
 
         let meta = this.metas[model._tableName]
         if (!meta) {
-            throw new Error('No metadata for ' + model._tableName)
+            console.warn('The model', model._modelName, 'doesnt have any db metadata attached')
+            return []
         }
         return meta
     }

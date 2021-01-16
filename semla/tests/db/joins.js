@@ -10,6 +10,10 @@ import {
     runMigrations,
 } from '../../fw/db/migrations/migration'
 
+/*
+Let's mock this instead. keeping it here in case I want this for something else in the future.
+
+Hm... or maybe with an sqlite db...
 class Migration_20200220_1429_CreateTables {
     change(m) {
         m.addTable('test_users', t => {
@@ -30,6 +34,7 @@ class Migration_20200220_1429_CreateTables {
         })
     }
 }
+ */
 
 class TestUser {
     static setup(m) {
@@ -56,9 +61,52 @@ class TestTeam {
 }
 
 test('Should handle a three table join', async () => {
+    /*
     try {
         await forceRunMigrationClass(Migration_20200220_1429_CreateTables)
     } catch (e) {} // only works once, then the tables already exist
+     */
+    const mockAdapter = new MockDbAdapter()
+    setDbAdapter(mockAdapter)
+
+    mockAdapter.addModelTableMetadata('test_users', [
+        {
+            name: 'id',
+            type: 'BIGSERIAL',
+        },
+        {
+            name: 'email',
+            type: 'TEXT'
+        }
+    ])
+    mockAdapter.addModelTableMetadata('test_memberships', [
+        {
+            name: 'id',
+            type: 'BIGSERIAL',
+        },
+        {
+            name: 'level',
+            type: 'TEXT'
+        },
+        {
+            name: 'test_user_id',
+            type: 'INTEGER'
+        },
+        {
+            name: 'test_team_id',
+            type: 'INTEGER'
+        },
+    ])
+    mockAdapter.addModelTableMetadata('test_teams', [
+        {
+            name: 'id',
+            type: 'BIGSERIAL',
+        },
+        {
+            name: 'name',
+            type: 'TEXT'
+        }
+    ])
 
     registerModel(TestUser)
     registerModel(TestMembership)

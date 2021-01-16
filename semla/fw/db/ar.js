@@ -217,10 +217,10 @@ export const addARQueryThings = model => {
         return instantiateFromDbRow(model, data.rows[0])
     }
 
-    model.join = relation => {
+    model.join = (...conditions) => {
         const qb = new QueryBuilder()
         qb.targetModel(model)
-        qb.join(relation)
+        qb.join(...conditions)
         return qb
     }
 

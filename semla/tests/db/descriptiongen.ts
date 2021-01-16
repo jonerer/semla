@@ -1,5 +1,12 @@
-import { findStartEnd, generateComment, generateNewContent, insertComment } from '../../fw/db/descriptiongen'
-import { ModelType } from '../../fw/db/models'
+import { MockDbAdapter } from '../../fw/db/adapters'
+import {
+    findStartEnd,
+    generateComment,
+    generateNewContent,
+    insertComment,
+    modelsToGenerateDescriptionsFor,
+} from '../../fw/db/descriptiongen'
+import { getLoadedUserModelList, ModelType, prepareModels, registerModel, setDbAdapter } from '../../fw/db/models'
 import { Field, Fields } from '../../fw/db/querying/fields'
 
 test('find start and end loc', () => {
@@ -139,4 +146,33 @@ export class Instrument {`
 
     const generated = await generateNewContent(textBefore, mockModel)
     expect(generated).toBe(textAfter)
+})
+
+class ModelLoaded {}
+
+class ModelNotLoaded {}
+
+const mockAdapter = new MockDbAdapter()
+setDbAdapter(mockAdapter)
+
+const makeMock = name => {
+    mockAdapter.addModelTableMetadata(name, [
+        {
+            name: 'id',
+            type: 'BIGSERIAL',
+        },
+    ])
+}
+
+test('Don\'t try to update a description if we werent able to load the model', async () => {
+    registerModel(ModelLoaded)
+    registerModel(ModelNotLoaded)
+    makeMock("model_loadeds")
+
+    await prepareModels()
+
+    const loadedModels = modelsToGenerateDescriptionsFor()
+
+    expect(loadedModels).toHaveLength(1)
+    expect(loadedModels[0]).toBe(ModelLoaded)
 })

@@ -35,8 +35,38 @@ beforeAll(async () => {
 
 class Example {}
 
+test('Should be able to produce IN() queries', async () => {
+    const findInSql = await Example.where({
+        id__in: [5, 10, 12]
+    }).sql()[0]
+
+    /*
+    Should I implement this? Or too ripe for misuse by for instance passing in an array-like via HTTP parameters?
+
+    const findInSqlAuto = await Example.where({
+        id: [5, 10, 12]
+    }).sql()[0]
+
+    expect(findInSql).toEqual(findInSqlAuto)
+     */
+
+    expect(findInSql.split('\n').join(' ')).toBe(
+        'SELECT e."id", e."example_field", e."created_at" FROM examples e WHERE e."id" = ANY ($1)'
+    )
+})
+
 test('Should handle simple query operations', async () => {
     const findOneSql = await Example.findOne(5, { onlySql: true })
+
+    expect(findOneSql.split('\n').join(' ')).toBe(
+        'SELECT e."id", e."example_field", e."created_at" FROM examples e WHERE e."id" = $1'
+    )
+
+    const findOneWhere = await Example.where({
+        id: 5
+    }).sql()[0]
+
+    expect(findOneWhere).toEqual(findOneSql)
 
     expect(findOneSql.split('\n').join(' ')).toBe(
         'SELECT e."id", e."example_field", e."created_at" FROM examples e WHERE e."id" = $1'

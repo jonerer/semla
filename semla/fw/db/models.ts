@@ -1,6 +1,6 @@
 import { query } from './db.js'
 import { pluralize } from '../utils.js'
-import { QueryBuilder, QueryField } from './querying/queryBuilder.js'
+import { QueryBuilder, QueryField } from './querying/queryBuilder'
 import { PostgresDbAdapter } from './adapters'
 import { addARQueryThings } from './ar'
 import { findOneSql } from './querying/utils'
@@ -13,6 +13,32 @@ import getCallerFile from 'get-caller-file';
 import debug from 'debug'
 
 const dbg = debug('semla:models')
+
+export interface ModelType {
+    _fields: Fields
+    _relationFields: Field[]
+    _modelName: string
+    prototype: any
+    _routeParamName: string
+    _setup: ModelSetupCollector
+    _tableName: string
+    _validations: ValidationCollector
+    _loaded: boolean
+    _registeringPath: string
+    loaded(): boolean
+
+    // some AR things.
+    // note: these are not the AR types that the end-user will see
+    // just dummy typings that are good enough for framework-internal use
+    findOne(any): any
+    find(any): any
+}
+
+interface ModelsType {
+    [s: string]: ModelType
+}
+
+export interface ModelInstance {} // this one is not use in runtime. (yet?)
 
 export const assureBucket = obj => {
     if (!obj._dirtyKeys) {
@@ -143,6 +169,11 @@ const addQueryProperties = (model: ModelType, field: Field) => {
     Object.defineProperty(model, field.jsName + '__gte', {
         value: gteQf,
     })
+
+    const inQf = new QueryField(model, field, 'ANY')
+    Object.defineProperty(model, field.jsName + '__in', {
+        value: inQf,
+    })
 }
 
 export const prepareModels = async () => {
@@ -155,8 +186,12 @@ export const prepareModels = async () => {
     dbg(`Prepare ${Object.keys(models).length} models`)
     const proms = Object.keys(models).map(async (key, idx) => {
         const modelDbg = debug('semla:models:prepare_' + idx)
-        modelDbg(`Prepare model ${idx}: ${key}`)
         const model = models[key]
+        if (model.loaded && model.loaded()) {
+            modelDbg(`Prepare model ${idx}: ${key} SKIPPED, already loaded`)
+            return
+        }
+        modelDbg(`Prepare model ${idx}: ${key}`)
         model.prototype._modelName = key
         model._modelName = key
         model._tableName = modelNameToTableName(key)
@@ -174,7 +209,9 @@ export const prepareModels = async () => {
         model._loaded = false
         modelDbg('Getting metadata from table, generating fields')
         const metadataRes = await dbAdapter.getModelTableMetadata(model)
-        model._loaded = true
+        if (metadataRes.length > 0) { // no metadata available
+            model._loaded = true
+        }
 
         model.loaded = () => {
             return model._loaded
@@ -245,29 +282,6 @@ export const prepareModels = async () => {
     dbg(`Model preparation done`)
 }
 
-export interface ModelType {
-    _fields: Fields
-    _relationFields: Field[]
-    _modelName: string
-    prototype: any
-    _routeParamName: string
-    _setup: ModelSetupCollector
-    _tableName: string
-    _validations: ValidationCollector
-    _loaded: boolean
-    _registeringPath: string
-    loaded(): boolean
-
-    // some AR things.
-    // note: these are not the AR types that the end-user will see
-    // just dummy typings that are good enough for framework-internal use
-    findOne(any): any
-    find(any): any
-}
-
-interface ModelsType {
-    [s: string]: ModelType
-}
 
 export const models: ModelsType = {}
 
@@ -296,11 +310,10 @@ export function getUserModels(): ModelsType {
 export function getLoadedUserModelList(): ModelType[] {
     const models = getUserModels()
     let modelList: ModelType[] = []
-    let anyNotLoaded = false
     for (const model of Object.values(models)) {
-        modelList.push(model)
-        if (!model.loaded()) {
-            anyNotLoaded = true
+        const isLoaded = model.loaded && model.loaded()
+        if (isLoaded) {
+            modelList.push(model)
         }
     }
     return modelList

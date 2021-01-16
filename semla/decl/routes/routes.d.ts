@@ -1,4 +1,5 @@
-export function registerRoutes(routes: any): void;
-export function clearRoutes(): void;
-export function getRouters(): any[];
-export function generateRoutes(): any[];
+import { GeneratedRoute } from './flattenerUtils';
+export declare function registerRoutes(routes: any): void;
+export declare function clearRoutes(): void;
+export declare function getRouters(): any;
+export declare function generateRoutes(): GeneratedRoute[];
