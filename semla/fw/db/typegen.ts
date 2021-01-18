@@ -4,11 +4,153 @@ import { getAppBasedir } from '../appinfo'
 import { readFileSync, writeFileSync, mkdirSync } from 'fs'
 import { prettierify } from '../devtools/services/Prettierify'
 
+interface Attributes {
+    settableName: string
+    settableContent: string
+    attributesName: string
+    attributesContent: string
+    joinableFieldsName: string
+    joinableFieldsType: string
+    queryFieldsName: string,
+    queryFieldsContent: string
+}
+
+export const generateAttributesForModel = (model: ModelType): Attributes => {
+    let all = model._fields.getAll()
+
+    const settableName = model._modelName + 'Settable'
+    let settableContent = `interface ${settableName} {\n`
+    for (const field of all) {
+        let tsType = field.tsType
+        if (tsType === 'Date' && useMoment()) {
+            tsType = 'Date | Moment'
+        }
+        settableContent +=
+            field.jsName + '?: ' + tsType + ' | null' + '\n' // todo: nullability!
+    }
+    for (const field of model._relationFields.filter(
+        x => x.type === 'belongsTo'
+    )) {
+        settableContent +=
+            field.jsName +
+            '?: ' +
+            'number | null | ' +
+            field.targetModel?._modelName +
+            ' | RelatedField<' +
+            field.targetModel?._modelName +
+            '>\n'
+    }
+    settableContent += '}\n'
+
+    const attributesName = model._modelName + "Attributes"
+    let attributesContent = `interface ${model._modelName}Attributes {\n`
+    for (const field of all) {
+        attributesContent += `${field.jsName}: ${field.tsType}\n`
+        // does this include "id"-fields?
+    }
+    for (const field of model._relationFields) {
+        attributesContent += `${field.jsName}: RelatedField<${field.targetModel?._modelName}>\n`
+    }
+    attributesContent += '}'
+
+    const joinableFieldsName = `${model._modelName}JoinableFields`
+    const jf = model._relationFields.map(x => "'" + x.jsName + "'").join(' | ')
+    const joinableFieldsType = `type ${joinableFieldsName} = ${jf}\n`
+
+    const queryFieldsName = `${model._modelName}QueryFields`
+    let queryFieldsContent = `interface ${queryFieldsName} {\n`
+    for (const field of all) {
+        const isId = field.jsName === 'id' || field.jsName.endsWith('Id') // todo improve?
+        const stringAllowed = isId || field.isDateTime()
+        const typeString = stringAllowed ? (field.tsType + ' | string') : field.tsType
+
+        queryFieldsContent += field.jsName + '?: ' + typeString + '\n'
+        queryFieldsContent += field.jsName + '__not?: ' + typeString + '\n'
+
+        if (field.isLessThanComparable()) {
+            queryFieldsContent += field.jsName + '__lt?: ' + typeString + '\n'
+            queryFieldsContent += field.jsName + '__lte?: ' + typeString + '\n'
+            queryFieldsContent += field.jsName + '__gt?: ' + typeString + '\n'
+            queryFieldsContent += field.jsName + '__gte?: ' + typeString + '\n'
+        }
+        queryFieldsContent += '\n'
+    }
+    for (const field of model._relationFields) {
+        queryFieldsContent += `${field.jsName}?: number | string | RelatedField<${field.targetModel?._modelName}> | ${field.targetModel?._modelName}QueryFields \n`
+    }
+    queryFieldsContent += '}\n'
+
+    const attrs: Attributes = {
+        settableName,
+        settableContent,
+        attributesName,
+        attributesContent,
+        joinableFieldsName,
+        joinableFieldsType,
+        queryFieldsName,
+        queryFieldsContent
+    }
+    return attrs
+}
+
+export const generateBodyForModel = (model: ModelType, models: ModelType[]) => {
+    let modelBody = 'export class ' + model._modelName + 'Base  {\n'
+    let all = model._fields.getAll()
+    for (const field of model._relationFields) {
+        if (field.type === 'belongsTo') {
+            modelBody +=
+                field.jsName +
+                ': RelatedField<' +
+                field.targetModel?._modelName +
+                '>\n'
+            modelBody += 'static ' + field.jsName + ': QueryField\n\n'
+        } else if (field.type === 'hasMany') {
+            modelBody +=
+                field.jsName +
+                ': RelatedField<' +
+                field.targetModel?._modelName +
+                '[]>\n\n'
+        }
+        // modelsToImport.push(field.targetModel?._modelName!)
+    }
+    for (const field of all) {
+        modelBody += field.jsName + ': ' + field.tsType + '\n'
+        if (field.jsName === 'name') {
+            modelBody += '    // @ts-ignore\n' // conflicts with built-in prototype constructor 'name'. really ignorable? unsure...
+        }
+        modelBody += 'static ' + field.jsName + ': QueryField\n\n'
+        modelBody += 'static ' + field.jsName + '__not: QueryField\n\n'
+        modelBody += 'static ' + field.jsName + '__lt: QueryField\n\n'
+        modelBody += 'static ' + field.jsName + '__lte: QueryField\n\n'
+        modelBody += 'static ' + field.jsName + '__gt: QueryField\n\n'
+        modelBody += 'static ' + field.jsName + '__gte: QueryField\n\n'
+    }
+
+    const attributes = generateAttributesForModel(model)
+
+    modelBody += attributes.settableContent
+
+    modelBody += '\n// instance methods\n'
+    modelBody += `set: (obj: ${attributes.settableName}) => void\n`
+    modelBody += `save: () => Promise<${model._modelName}>\n`
+    modelBody += '\n// AR methods\n'
+    modelBody += 'static where: (from: any, to: any) => any\n'
+    modelBody += 'static join: (from: any) => any\n'
+    modelBody += 'static order: (from: any) => any\n'
+    modelBody += `static find: (from?: any) => Promise<${model._modelName}[]>\n`
+    modelBody += `static findOne: (from: any) => Promise<${model._modelName}>\n`
+    modelBody += '}\n'
+
+    return modelBody
+}
+
+const useMoment = () => {
+    return true
+}
+
 const generateTypesContent = (models: ModelType[]) => {
     // make a little prelude
     // for each model, create a string for the interface, one for the import
-
-    const useMoment = true
 
     let infoHeader = `// This file was automatically generated by the Semla framework.\n`
     infoHeader +=
@@ -72,84 +214,16 @@ export interface RequestContext {
     let modelsToImport: string[] = []
     let imports = ``
 
-    if (useMoment) {
+    if (useMoment()) {
         imports += 'import { Moment } from \'moment\'\n'
     }
 
     let modelsBody = ``
 
-    let settablesBody = ``
-
     for (const model of models) {
-        let modelBody = 'export class ' + model._modelName + 'Base  {\n'
+        const modelBody = generateBodyForModel(model, models)
 
         modelsToImport.push(model._modelName)
-        let all = model._fields.getAll()
-        for (const field of model._relationFields) {
-            if (field.type === 'belongsTo') {
-                modelBody +=
-                    field.jsName +
-                    ': RelatedField<' +
-                    field.targetModel?._modelName +
-                    '>\n'
-                modelBody += 'static ' + field.jsName + ': QueryField\n\n'
-            } else if (field.type === 'hasMany') {
-                modelBody +=
-                    field.jsName +
-                    ': RelatedField<' +
-                    field.targetModel?._modelName +
-                    '[]>\n\n'
-            }
-            modelsToImport.push(field.targetModel?._modelName!)
-        }
-        for (const field of all) {
-            modelBody += field.jsName + ': ' + field.tsType + '\n'
-            if (field.jsName === 'name') {
-                modelBody += '    // @ts-ignore\n' // conflicts with built-in prototype constructor 'name'. really ignorable? unsure...
-            }
-            modelBody += 'static ' + field.jsName + ': QueryField\n\n'
-            modelBody += 'static ' + field.jsName + '__not: QueryField\n\n'
-            modelBody += 'static ' + field.jsName + '__lt: QueryField\n\n'
-            modelBody += 'static ' + field.jsName + '__lte: QueryField\n\n'
-            modelBody += 'static ' + field.jsName + '__gt: QueryField\n\n'
-            modelBody += 'static ' + field.jsName + '__gte: QueryField\n\n'
-        }
-
-        const settableInterfaceName = model._modelName + 'Settable'
-        let settableInterface = `interface ${settableInterfaceName} {\n`
-        for (const field of all) {
-            let tsType = field.tsType
-            if (tsType === 'Date' && useMoment) {
-                tsType = 'Date | Moment'
-            }
-            settableInterface +=
-                field.jsName + '?: ' + tsType + ' | null' + '\n' // todo: nullability!
-        }
-        for (const field of model._relationFields.filter(
-            x => x.type === 'belongsTo'
-        )) {
-            settableInterface +=
-                field.jsName +
-                '?: ' +
-                'number | null | ' +
-                field.targetModel?._modelName +
-                ' | RelatedField<' +
-                field.targetModel?._modelName +
-                '>\n'
-        }
-        settableInterface += '}\n'
-        settablesBody += settableInterface
-
-        modelBody += '\n// instance methods\n'
-        modelBody += `set: (obj: ${settableInterfaceName}) => void\n`
-        modelBody += `save: () => Promise<${model._modelName}>\n`
-        modelBody += '\n// AR methods\n'
-        modelBody += 'static where: (from: any, to: any) => any\n'
-        modelBody += 'static join: (from: any) => any\n'
-        modelBody += 'static order: (from: any) => any\n'
-        modelBody += `static find: (from?: any) => Promise<${model._modelName}[]>\n`
-        modelBody += `static findOne: (from: any) => Promise<${model._modelName}>\n`
-        modelBody += '}\n'
 
         modelsBody += modelBody + '\n'
     }
@@ -173,8 +247,6 @@ export interface RequestContext {
         prelude +
         '\n\n' +
         requestContextInterfaceThing +
-        '\n\n' +
-        settablesBody +
         '\n\n' +
         modelsBody
     // return prettierify(s)

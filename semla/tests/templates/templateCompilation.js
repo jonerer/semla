@@ -1,7 +1,7 @@
 import { TemplateCompiler } from '../../fw/view/compiler'
 import fs from 'fs'
 
-const withoutWhitespace = input => {
+export const withoutWhitespace = input => {
     return input
         .split(' ')
         .join('')

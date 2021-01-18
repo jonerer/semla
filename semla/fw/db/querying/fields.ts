@@ -43,6 +43,10 @@ export class Field {
     tsType: string
     relationField?: Field
 
+    isLessThanComparable() {
+        return ['number', 'Date'].includes(this.tsType)
+    }
+
     static typeStringToTsType(string) {
         switch (string) {
             case 'BOOL':
@@ -129,6 +133,10 @@ export class Field {
     // this one turns something like example_query_field_id into exampleQueryFieldId
     jsIfy(dbName) {
         return jsifyFieldName(dbName)
+    }
+
+    isDateTime() {
+        return this.tsType === 'Date'
     }
 }
 
