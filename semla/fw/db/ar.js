@@ -146,8 +146,6 @@ export const addARQueryThings = model => {
         }
     }
 
-
-
     model.prototype.save = async function(opts) {
         let retval = null
 
@@ -259,10 +257,10 @@ export const addARQueryThings = model => {
     model.find = async (conditions, _opts) => {
         const opts = _opts || {}
         const qb = new QueryBuilder()
-        if (conditions !== undefined) {
-            qb.addConditions(conditions)
-        }
         qb.targetModel(model)
+        if (conditions !== undefined) {
+            qb.where(conditions)
+        }
         const [completeSql, values] = await qb.sql()
 
         if (opts.onlySql) {

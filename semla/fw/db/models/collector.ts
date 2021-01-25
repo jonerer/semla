@@ -3,9 +3,17 @@ import { ModelType } from '../models'
 
 export interface CollectedRelation {
     type: 'belongsTo' | 'hasMany'
-    name: string,
-    options: any,
+    name: string
+    options: any
     model: ModelType
+}
+
+export interface BelongsToOptions {
+    model?: string
+}
+
+export interface HasManyOptions {
+    model?: string
 }
 
 export class ModelSetupCollector {
@@ -24,7 +32,7 @@ export class ModelSetupCollector {
         this.validationCollector = new ValidationCollector()
     }
 
-    belongsTo(name, options = {}) {
+    belongsTo(name, options: BelongsToOptions = {}) {
         this.relations.push({
             type: 'belongsTo',
             name,
@@ -41,7 +49,7 @@ export class ModelSetupCollector {
         this._getFromParamCallback = callback
     }
 
-    hasMany(name, options = {}) {
+    hasMany(name, options: HasManyOptions = {}) {
         this.relations.push({
             type: 'hasMany',
             name,

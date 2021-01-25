@@ -34,6 +34,8 @@ export class PostgresDbAdapter extends DbAdapter {
                 return 'TIMESTAMPTZ'
             case 700:
                 return 'REAL'
+            case 1700:
+                return 'DECIMAL'
             default:
                 throw new Error(
                     `unknown field type for field ${tableName}:${name}, ${dataTypeId}`
@@ -72,7 +74,9 @@ export class PostgresDbAdapter extends DbAdapter {
                 " couldn't load correctly! Probably it doesn't exist in the database. Nested error: " +
                     e.message
             )
-            console.warn(chalk.black.bgRed('Probably you need to run migrations'))
+            console.warn(
+                chalk.black.bgRed('Probably you need to run migrations')
+            )
             return []
         }
     }
@@ -100,7 +104,11 @@ export class MockDbAdapter extends DbAdapter {
 
         let meta = this.metas[model._tableName]
         if (!meta) {
-            console.warn('The model', model._modelName, 'doesnt have any db metadata attached')
+            console.warn(
+                'The model',
+                model._modelName,
+                'doesnt have any db metadata attached'
+            )
             return []
         }
         return meta

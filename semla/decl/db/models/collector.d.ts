@@ -6,6 +6,12 @@ export interface CollectedRelation {
     options: any;
     model: ModelType;
 }
+export interface BelongsToOptions {
+    model?: string;
+}
+export interface HasManyOptions {
+    model?: string;
+}
 export declare class ModelSetupCollector {
     relations: CollectedRelation[];
     fillable_fields: string[];
@@ -13,9 +19,9 @@ export declare class ModelSetupCollector {
     validationCollector: ValidationCollector;
     _getFromParamCallback: (id: any) => string;
     constructor(model: ModelType);
-    belongsTo(name: any, options?: {}): void;
+    belongsTo(name: any, options?: BelongsToOptions): void;
     fillable(fields: any): void;
     getFromParam(callback: any): void;
-    hasMany(name: any, options?: {}): void;
+    hasMany(name: any, options?: HasManyOptions): void;
     validate(callback: (validations: ValidationCollector) => void): void;
 }

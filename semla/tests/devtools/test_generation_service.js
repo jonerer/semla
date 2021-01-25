@@ -9,6 +9,7 @@ const mockAdapter = new MockDbAdapter()
 setDbAdapter(mockAdapter)
 
 beforeAll(async () => {
+    add('semla.selftest_template_pathing', true)
     mockAdapter.addModelTableMetadata('dev_file_changes', [
         {
             name: 'id',
@@ -37,7 +38,7 @@ test('Should generate some stuff for a nested authenticated resource', async () 
         name: 'Goal',
         nestingParent: 'Team',
         requireAuth: true,
-        noSave: true
+        noSave: true,
     })
 
     expect(generated.length).toBe(4)
@@ -64,7 +65,7 @@ test('Should take variant into account', async () => {
         nestingParent: 'Team',
         requireAuth: true,
         variant: 'ts',
-        noSave: true
+        noSave: true,
     })
 
     expect(generated.length).toBe(4)
@@ -73,8 +74,7 @@ test('Should take variant into account', async () => {
     const modelPath = generated[0].path
 
     expect(modelPath.endsWith('Goal.ts'))
-    expect(modelConts).toContain("types")
+    expect(modelConts).toContain('types')
 })
 
-afterAll(async () => {
-})
+afterAll(async () => {})

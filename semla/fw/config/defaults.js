@@ -23,4 +23,6 @@ export function applyDefaultConfig() {
     addDefault('codegen.models', envShortName() == 'dev') // only true for TS projects somehow?
 
     addDefault('port', process.env.PORT || 8000)
+
+    addDefault('semla.selftest_template_pathing', false)
 }

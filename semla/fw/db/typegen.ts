@@ -11,7 +11,7 @@ interface Attributes {
     attributesContent: string
     joinableFieldsName: string
     joinableFieldsType: string
-    queryFieldsName: string,
+    queryFieldsName: string
     queryFieldsContent: string
 }
 
@@ -25,8 +25,7 @@ export const generateAttributesForModel = (model: ModelType): Attributes => {
         if (tsType === 'Date' && useMoment()) {
             tsType = 'Date | Moment'
         }
-        settableContent +=
-            field.jsName + '?: ' + tsType + ' | null' + '\n' // todo: nullability!
+        settableContent += field.jsName + '?: ' + tsType + ' | null' + '\n' // todo: nullability!
     }
     for (const field of model._relationFields.filter(
         x => x.type === 'belongsTo'
@@ -42,7 +41,7 @@ export const generateAttributesForModel = (model: ModelType): Attributes => {
     }
     settableContent += '}\n'
 
-    const attributesName = model._modelName + "Attributes"
+    const attributesName = model._modelName + 'Attributes'
     let attributesContent = `interface ${model._modelName}Attributes {\n`
     for (const field of all) {
         attributesContent += `${field.jsName}: ${field.tsType}\n`
@@ -54,7 +53,8 @@ export const generateAttributesForModel = (model: ModelType): Attributes => {
     attributesContent += '}'
 
     const joinableFieldsName = `${model._modelName}JoinableFields`
-    const jf = model._relationFields.map(x => "'" + x.jsName + "'").join(' | ')
+    const jf =
+        model._relationFields.map(x => "'" + x.jsName + "'").join(' | ') || "''"
     const joinableFieldsType = `type ${joinableFieldsName} = ${jf}\n`
 
     const queryFieldsName = `${model._modelName}QueryFields`
@@ -62,7 +62,9 @@ export const generateAttributesForModel = (model: ModelType): Attributes => {
     for (const field of all) {
         const isId = field.jsName === 'id' || field.jsName.endsWith('Id') // todo improve?
         const stringAllowed = isId || field.isDateTime()
-        const typeString = stringAllowed ? (field.tsType + ' | string') : field.tsType
+        const typeString = stringAllowed
+            ? field.tsType + ' | string'
+            : field.tsType
 
         queryFieldsContent += field.jsName + '?: ' + typeString + '\n'
         queryFieldsContent += field.jsName + '__not?: ' + typeString + '\n'
@@ -88,13 +90,16 @@ export const generateAttributesForModel = (model: ModelType): Attributes => {
         joinableFieldsName,
         joinableFieldsType,
         queryFieldsName,
-        queryFieldsContent
+        queryFieldsContent,
     }
     return attrs
 }
 
-export const generateBodyForModel = (model: ModelType, models: ModelType[]) => {
-    let modelBody = 'export class ' + model._modelName + 'Base  {\n'
+export const generateBaseClassForModel = (
+    model: ModelType,
+    attributes: Attributes
+) => {
+    let modelBody = 'export class ' + model._modelName + 'Base {\n'
     let all = model._fields.getAll()
     for (const field of model._relationFields) {
         if (field.type === 'belongsTo') {
@@ -126,22 +131,37 @@ export const generateBodyForModel = (model: ModelType, models: ModelType[]) => {
         modelBody += 'static ' + field.jsName + '__gte: QueryField\n\n'
     }
 
-    const attributes = generateAttributesForModel(model)
-
-    modelBody += attributes.settableContent
-
     modelBody += '\n// instance methods\n'
     modelBody += `set: (obj: ${attributes.settableName}) => void\n`
     modelBody += `save: () => Promise<${model._modelName}>\n`
     modelBody += '\n// AR methods\n'
-    modelBody += 'static where: (from: any, to: any) => any\n'
-    modelBody += 'static join: (from: any) => any\n'
+    modelBody += `static where: (arg0: ${attributes.queryFieldsName}) => any\n`
+    /*
+    // todo how to have multiple shapes? overloading etc
+    modelBody +=
+        'static where: (from: QueryField, to: QueryField | ValueType) => any\n'
+     */
+    modelBody += `static join: (arg0: ${attributes.joinableFieldsName}, arg1?: ${attributes.queryFieldsName}) => any\n`
     modelBody += 'static order: (from: any) => any\n'
-    modelBody += `static find: (from?: any) => Promise<${model._modelName}[]>\n`
-    modelBody += `static findOne: (from: any) => Promise<${model._modelName}>\n`
+    modelBody += `static find: (from?: ${attributes.queryFieldsName}) => Promise<${model._modelName}[]>\n`
+    modelBody += `static findOne: (from: ${attributes.queryFieldsName} | ValueType) => Promise<${model._modelName}>\n`
+    // todo: unify parameters for find and findOne
     modelBody += '}\n'
 
     return modelBody
+}
+
+export const generateBodyForModel = (model: ModelType) => {
+    const attributes = generateAttributesForModel(model)
+    const baseClass = generateBaseClassForModel(model, attributes)
+    let body = ''
+    body += '// ' + model._modelName + ' related types\n\n'
+    body += attributes.settableContent
+    body += attributes.queryFieldsContent
+    body += attributes.joinableFieldsType
+    body += attributes.attributesContent
+    body += baseClass
+    return body + '\n\n'
 }
 
 const useMoment = () => {
@@ -189,6 +209,8 @@ interface ParamsObject {
     [s: string]: any
 }
 
+type ValueType = 'number' | 'string' | 'boolean'
+
 export type flashTypes = 'info' | 'error' | 'warn'
 
 interface Flash {
@@ -215,13 +237,13 @@ export interface RequestContext {
     let imports = ``
 
     if (useMoment()) {
-        imports += 'import { Moment } from \'moment\'\n'
+        imports += "import { Moment } from 'moment'\n"
     }
 
     let modelsBody = ``
 
     for (const model of models) {
-        const modelBody = generateBodyForModel(model, models)
+        const modelBody = generateBodyForModel(model)
 
         modelsToImport.push(model._modelName)
 

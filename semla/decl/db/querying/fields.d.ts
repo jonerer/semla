@@ -11,10 +11,12 @@ export declare class Field {
     model: ModelType;
     tsType: string;
     relationField?: Field;
-    static typeStringToTsType(string: any): "string" | "number" | "boolean" | "Date";
+    isLessThanComparable(): boolean;
+    static typeStringToTsType(string: any): "number" | "string" | "Date" | "boolean";
     static FromDb(dbName: any, type: any): Field;
     static FromRelation(relation: any): Field;
     jsIfy(dbName: any): string;
+    isDateTime(): boolean;
 }
 export declare class Fields {
     private all;

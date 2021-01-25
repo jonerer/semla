@@ -1,4 +1,15 @@
-import { CustomValidator, PresentValidator, ResultsCollector, ValidationModes, Validator } from './validators'
+import {
+    CustomValidator,
+    PresentValidator,
+    ResultsCollector,
+    ValidationModes,
+    Validator,
+} from './validators'
+
+export interface ValidationOptions {
+    updating?: boolean
+    creation?: boolean
+}
 
 export class ValidationCollector {
     private validators: any[]
@@ -7,7 +18,7 @@ export class ValidationCollector {
         this.validators = []
     }
 
-    present(fields: string[] | string, _options) {
+    present(fields: string[] | string, _options?: ValidationOptions) {
         const options = _options || {}
         if (typeof options !== 'object') {
             throw new Error(
@@ -17,7 +28,10 @@ export class ValidationCollector {
         this.validators.push(new PresentValidator(fields, options))
     }
 
-    custom(callback: (instance: any, results: ResultsCollector) => Promise<void>, _options) {
+    custom(
+        callback: (instance: any, results: ResultsCollector) => Promise<void>,
+        _options?: ValidationOptions
+    ) {
         if (!callback) {
             throw new Error(
                 'Tried to add custom method as validation, but method was null or undefined'

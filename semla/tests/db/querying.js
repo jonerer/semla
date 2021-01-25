@@ -37,7 +37,7 @@ class Example {}
 
 test('Should be able to produce IN() queries', async () => {
     const findInSql = await Example.where({
-        id__in: [5, 10, 12]
+        id__in: [5, 10, 12],
     }).sql()[0]
 
     /*
@@ -63,7 +63,7 @@ test('Should handle simple query operations', async () => {
     )
 
     const findOneWhere = await Example.where({
-        id: 5
+        id: 5,
     }).sql()[0]
 
     expect(findOneWhere).toEqual(findOneSql)
@@ -71,6 +71,15 @@ test('Should handle simple query operations', async () => {
     expect(findOneSql.split('\n').join(' ')).toBe(
         'SELECT e."id", e."example_field", e."created_at" FROM examples e WHERE e."id" = $1'
     )
+
+    const findOneByObject = await Example.findOne(
+        {
+            id: 5,
+        },
+        { onlySql: true }
+    )
+
+    expect(findOneByObject).toEqual(findOneSql)
 
     const findSql = await Example.find([Example.exampleField, 'fniss'], {
         onlySql: true,
@@ -203,8 +212,10 @@ test('Should be able to pass in a param *after* a null-parameter', async () => {
 })
 
 test('Should be able to "less than" queries', async () => {
-    const findOneSql = Example.where(Example.exampleField__lt, '2020-08-23')
-        .sql()[0]
+    const findOneSql = Example.where(
+        Example.exampleField__lt,
+        '2020-08-23'
+    ).sql()[0]
 
     expect(
         findOneSql
@@ -217,8 +228,10 @@ test('Should be able to "less than" queries', async () => {
 })
 
 test('Should be able to "less than or equal" queries', async () => {
-    const findOneSql = Example.where(Example.exampleField__lte, '2020-08-23')
-        .sql()[0]
+    const findOneSql = Example.where(
+        Example.exampleField__lte,
+        '2020-08-23'
+    ).sql()[0]
 
     expect(
         findOneSql
@@ -231,8 +244,10 @@ test('Should be able to "less than or equal" queries', async () => {
 })
 
 test('Should be able to "greater than" queries', async () => {
-    const findOneSql = Example.where(Example.exampleField__gt, '2020-08-23')
-        .sql()[0]
+    const findOneSql = Example.where(
+        Example.exampleField__gt,
+        '2020-08-23'
+    ).sql()[0]
 
     expect(
         findOneSql
@@ -245,8 +260,10 @@ test('Should be able to "greater than" queries', async () => {
 })
 
 test('Should be able to "greater than or equal" queries', async () => {
-    const findOneSql = Example.where(Example.exampleField__gte, '2020-08-23')
-        .sql()[0]
+    const findOneSql = Example.where(
+        Example.exampleField__gte,
+        '2020-08-23'
+    ).sql()[0]
 
     expect(
         findOneSql

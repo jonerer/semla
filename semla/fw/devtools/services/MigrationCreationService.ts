@@ -27,10 +27,13 @@ export class MigrationCreationService {
         this.changes = []
         this.variant = 'js'
     }
+
     input(json) {
         this.name = json.name
         this.changes = json.changes
+        this.variant = json.variant || 'js'
     }
+
     classify(name) {
         // make name class-friendly
         return name.split('-').join('')

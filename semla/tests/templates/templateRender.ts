@@ -3,6 +3,11 @@ import fs from 'fs'
 import { v4 as uuid } from 'uuid'
 import { Renderer } from '../../fw/view/render'
 import { getFwBasedir } from '../../fw/appinfo'
+import { add } from '../../fw/fw'
+
+beforeAll(() => {
+    add('semla.selftest_template_pathing', true)
+})
 
 const rendered = async (input, locals) => {
     const tempName = 'test-temp-' + uuid()

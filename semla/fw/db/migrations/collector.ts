@@ -27,7 +27,6 @@ abstract class MigrationField {
     abstract ddl(param: TableObject): any
 }
 
-
 class BoolField extends MigrationField {
     constructor(name, options) {
         super(name, options)
@@ -106,6 +105,18 @@ class PrimaryKeyField extends MigrationField {
     }
 }
 
+class DecimalField extends MigrationField {
+    constructor(name, options: FieldOptions | undefined) {
+        super(name, options)
+        this.type = 'decimal'
+    }
+
+    ddl(table: MigratorTable) {
+        const optionsText = this.nullableString()
+        return `${this.name} decimal${optionsText}`
+    }
+}
+
 export class MigratorTable {
     private fields: MigrationField[]
     public name: string
@@ -143,6 +154,10 @@ export class MigratorTable {
 
     timestamptz(name, options?: FieldOptions) {
         this.fields.push(new TimestamptzField(name, options))
+    }
+
+    decimal(name, options?: FieldOptions) {
+        this.fields.push(new DecimalField(name, options))
     }
 
     timestamps() {
@@ -207,11 +222,15 @@ class FieldCollector {
         this.fields.push(new TimestamptzField(name, opts))
     }
 
+    decimal(name, options?: FieldOptions) {
+        this.fields.push(new DecimalField(name, options))
+    }
+
     generateDDL() {
         let toRet = ''
         let i = 0
         const tableinfo = {
-            name: this.tableName
+            name: this.tableName,
         }
         for (const f of this.fields) {
             toRet += `alter table ${this.tableName}\n\tadd ${f.ddl(tableinfo)};`
@@ -291,7 +310,9 @@ export class AlterTable {
     }
 
     rename(from, to) {
-        this.operations.push(new RenameColumnOperation(this.tableName, from, to))
+        this.operations.push(
+            new RenameColumnOperation(this.tableName, from, to)
+        )
     }
 
     dropColumn(name) {
@@ -307,9 +328,7 @@ export class AlterTable {
     generateOperationDDLs() {
         let stmts: string[] = []
         for (const op of this.operations) {
-            stmts.push(
-                op.ddl()
-            )
+            stmts.push(op.ddl())
         }
         return stmts.join('\n').trim()
     }
@@ -343,7 +362,13 @@ class RenameTable extends TableOperation {
     }
 
     ddl() {
-        return 'alter table ' + this.tableName + ' rename to ' + this._nameAfter + ';'
+        return (
+            'alter table ' +
+            this.tableName +
+            ' rename to ' +
+            this._nameAfter +
+            ';'
+        )
     }
 }
 
@@ -358,11 +383,11 @@ export class MigrationCollector {
         this.rawQueries = []
     }
 
-    query(text) {
+    query(text: string) {
         this.rawQueries.push(text)
     }
 
-    alterTable(name, cb: (t: AlterTable) => void) {
+    alterTable(name: string, cb: (t: AlterTable) => void) {
         const table = new AlterTable(name)
         this.alterTables.push(table)
         cb(table)
@@ -372,7 +397,7 @@ export class MigrationCollector {
         this.alterTables.push(new RenameTable(nameBefore, nameAfter))
     }
 
-    addTable(name, cb: (t: MigratorTable) => void) {
+    addTable(name: string, cb: (t: MigratorTable) => void) {
         const table = new MigratorTable(name)
         this.tables.push(table)
         cb(table)

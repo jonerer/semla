@@ -1,4 +1,4 @@
-import { ValidationCollector } from './collection'
+import { ValidationCollector, ValidationOptions } from './collection'
 
 export interface Validator {
     validate(instance, results: ResultsCollector): Promise<void>
@@ -8,8 +8,8 @@ export type ValidationModes = 'update' | 'create'
 
 export class PresentValidator implements Validator {
     private fields: any[]
-    private options: any
-    
+    private options: ValidationOptions
+
     constructor(_fieldNames, options) {
         if (!Array.isArray(_fieldNames)) {
             this.fields = [_fieldNames]
@@ -31,7 +31,7 @@ export class PresentValidator implements Validator {
 export class CustomValidator implements Validator {
     private callback: any
     private options: any
-    
+
     constructor(callback, options) {
         this.callback = callback
         this.options = options
@@ -50,7 +50,7 @@ interface ValidationFailure {
 
 export class ResultsCollector {
     private fails: any[]
-    
+
     constructor() {
         this.fails = []
     }

@@ -1,5 +1,5 @@
 import { query } from './db.js'
-import { pluralize } from '../utils.js'
+import { pluralize } from '../utils'
 import { QueryBuilder, QueryField } from './querying/queryBuilder'
 import { PostgresDbAdapter } from './adapters'
 import { addARQueryThings } from './ar'
@@ -9,7 +9,7 @@ import { setupRelations } from './querying/relations'
 import { ValidationCollector } from './validation/collection'
 import { ModelSetupCollector } from './models/collector'
 import { addGlobal } from '../globals'
-import getCallerFile from 'get-caller-file';
+import getCallerFile from 'get-caller-file'
 import debug from 'debug'
 
 const dbg = debug('semla:models')
@@ -209,7 +209,8 @@ export const prepareModels = async () => {
         model._loaded = false
         modelDbg('Getting metadata from table, generating fields')
         const metadataRes = await dbAdapter.getModelTableMetadata(model)
-        if (metadataRes.length > 0) { // no metadata available
+        if (metadataRes.length > 0) {
+            // no metadata available
             model._loaded = true
         }
 
@@ -281,7 +282,6 @@ export const prepareModels = async () => {
     await Promise.all(proms)
     dbg(`Model preparation done`)
 }
-
 
 export const models: ModelsType = {}
 

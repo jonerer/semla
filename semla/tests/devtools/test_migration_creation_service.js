@@ -1,5 +1,9 @@
 import { MigrationCreationService } from '../../fw/devtools/services/MigrationCreationService'
 
+beforeAll(() => {
+    add('semla.selftest_template_pathing', true)
+})
+
 test('Should generate a valid migration file', () => {
     const serv = new MigrationCreationService()
     let input = {

@@ -65,6 +65,8 @@ export class Field {
                 return 'Date'
             case 'TIMESTAMPTZ':
                 return 'Date'
+            case 'DECIMAL':
+                return 'number'
             default:
                 throw new Error('Unknown type name ' + string)
         }

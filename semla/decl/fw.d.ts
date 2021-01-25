@@ -14,3 +14,4 @@ export { registerInitializer } from "./initialize/startup";
 export { registerSerializer } from "./db/serialization";
 export { ModelSetupCollector } from "./db/models/collector";
 export { MigrationCollector } from "./db/migrations/collector";
+export { add } from "./config/config";

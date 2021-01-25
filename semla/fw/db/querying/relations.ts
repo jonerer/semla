@@ -10,7 +10,13 @@ const setupBelongsTo = (model: ModelType, relation: CollectedRelation) => {
     // todo: this needs to be affected by the _id field
     model._relationFields.push(field)
     // find the "id" field and assign this as a relation
-    model._fields.getByDbName(field.dbName)!.relationField = field
+
+    try {
+        model._fields.getByDbName(field.dbName)!.relationField = field
+    } catch (e) {
+        console.error(e.message, e.stack)
+        throw new Error(`Unable to set up relation field on ${model._modelName}.${field.dbName}. Nested stack:`)
+    }
 
     // set up the instance field
     const jsName = field.jsName

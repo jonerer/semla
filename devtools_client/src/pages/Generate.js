@@ -15,6 +15,7 @@ import Api from '../utils/Api'
 import { useModels } from './migrations/Create'
 import styled from 'styled-components'
 import Code from '../shared/Code'
+import { VariantSelector } from '../utils/VariantSelector'
 
 const ItemHeaderLeft = styled.div`
     cursor: pointer;
@@ -160,13 +161,6 @@ const GeneratePage = () => {
         }
     }
 
-    const variantOptions = ['js', 'ts'].map(name => {
-        return {
-            key: name,
-            value: name,
-            text: name
-        }
-    })
     /*
     const modelOptions = models.map((x) => ({
         key: x.name,
@@ -181,7 +175,7 @@ const GeneratePage = () => {
             fullResource,
             nestingParent,
             requiresAuth,
-            variant: variantSelected
+            variant: variantSelected,
         }
 
         setCreating(true)
@@ -260,21 +254,12 @@ const GeneratePage = () => {
                                 Create!
                             </Button>
                         </Form.Group>
+
                         <Form.Group inline>
-                            <Form.Field>
-                                <label>
-                                    Variant
-                                </label>
-                                <Dropdown
-                                    compact
-                                    selection
-                                    options={variantOptions}
-                                    value={variantSelected}
-                                    onChange={(e, { value }) =>
-                                        setVariantSelected(value)
-                                    }
-                                />
-                            </Form.Field>
+                            <VariantSelector
+                                value={variantSelected}
+                                onChange={setVariantSelected}
+                            />
                         </Form.Group>
                         {/*
                         <Form.Group inline>

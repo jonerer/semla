@@ -19,6 +19,8 @@ export { registerSerializer } from './db/serialization'
 export { ModelSetupCollector } from './db/models/collector'
 export { MigrationCollector } from './db/migrations/collector'
 
+export { add, get } from './config/config'
+
 import { loadAllFiles, addAbsoluteImportDir } from './loader'
 import cors from 'cors'
 import { addMigrationFileDir } from './db/migrations/migration'
@@ -77,7 +79,6 @@ const setupApp = app => {
         app.use(cors()) // todo fine-tune
     }
 }
-
 
 export async function load() {
     setupEnv()

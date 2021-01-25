@@ -1,8 +1,9 @@
 import { start } from '../fw'
-import * as axios from 'axios'
+import axios from 'axios'
 import { setAppBasedir } from '../appinfo'
 import { add, addDefault } from '../config/config'
 import * as cheerio from 'cheerio'
+import getPort from 'get-port'
 // import * as jest from 'jest'
 
 let headers = {}
@@ -50,8 +51,17 @@ const baseurl = () => {
 
 let server
 
-export async function startup({ port }) {
-    process.env.PORT = port
+export async function startup(_config) {
+    const config = _config || {}
+    let portToUse: number = -1
+    if (!config.port && !process.env.PORT) {
+        portToUse = await getPort()
+    } else if (process.env.PORT) {
+        portToUse = parseInt(process.env.PORT)
+    } else {
+        portToUse = config.port
+    }
+    process.env.PORT = '' + portToUse
     process.env.NODE_ENV = 'test'
     addDefault('routes.defaults.csrfProtection', false)
 
@@ -59,7 +69,9 @@ export async function startup({ port }) {
 }
 
 export async function finish() {
-    return server.shutdown()
+    if (server) {
+        return server.shutdown()
+    }
 }
 
 export async function get$(url) {

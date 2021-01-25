@@ -24,6 +24,7 @@ export declare class MigratorTable {
     boolean(name: any, options?: FieldOptions): void;
     timestamp(name: any, options?: FieldOptions): void;
     timestamptz(name: any, options?: FieldOptions): void;
+    decimal(name: any, options?: FieldOptions): void;
     timestamps(): void;
     generateDDL(): string;
 }
@@ -38,6 +39,7 @@ declare class FieldCollector {
     integer(name: any, opts: FieldOptions): void;
     timestamp(name: any, opts: FieldOptions): void;
     timestamptz(name: any, opts: FieldOptions): void;
+    decimal(name: any, options?: FieldOptions): void;
     generateDDL(): string;
 }
 declare abstract class TableOperation {
@@ -61,10 +63,10 @@ export declare class MigrationCollector {
     private tables;
     private alterTables;
     constructor();
-    query(text: any): void;
-    alterTable(name: any, cb: (t: AlterTable) => void): void;
+    query(text: string): void;
+    alterTable(name: string, cb: (t: AlterTable) => void): void;
     renameTable(nameBefore: string, nameAfter: string): void;
-    addTable(name: any, cb: (t: MigratorTable) => void): void;
+    addTable(name: string, cb: (t: MigratorTable) => void): void;
     generateStatements(): string[];
 }
 export {};

@@ -14,6 +14,7 @@ import {
 } from 'semantic-ui-react'
 import Api from '../../utils/Api'
 import moment from 'moment'
+import { VariantSelector } from '../../utils/VariantSelector'
 
 const availableFieldTypes = ['integer', 'text', 'timestamptz']
 
@@ -222,6 +223,8 @@ export default () => {
 
     const [fileWritten, setFileWritten] = useState('')
 
+    const [variantSelected, setVariantSelected] = useState('js')
+
     useEffect(() => {
         setTimestr(moment().format('YYYY-MM-DD_HH-mm_'))
     }, [])
@@ -258,6 +261,7 @@ export default () => {
                     tableName: change.tableName,
                 }
             }),
+            variant: variantSelected,
         }
 
         setCreating(true)
@@ -395,6 +399,12 @@ export default () => {
                                 }
                             ></Input>
                         </Form.Field>
+
+                        <VariantSelector
+                            value={variantSelected}
+                            onChange={setVariantSelected}
+                        />
+
                         <Button
                             primary
                             loading={creating}

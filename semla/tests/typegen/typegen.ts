@@ -1,6 +1,15 @@
 import { MockDbAdapter } from '../../fw/db/adapters'
-import { clearModels, prepareModels, registerModel, setDbAdapter } from '../../fw/db/models'
-import { generateAttributesForModel, generateBodyForModel } from '../../fw/db/typegen'
+import {
+    clearModels,
+    prepareModels,
+    registerModel,
+    setDbAdapter,
+} from '../../fw/db/models'
+import {
+    generateAttributesForModel,
+    generateBaseClassForModel,
+    generateBodyForModel,
+} from '../../fw/db/typegen'
 import { withoutWhitespace } from '../templates/templateCompilation'
 
 class User {
@@ -83,37 +92,83 @@ const expectedQueryFields = `interface MembershipQueryFields {
     user?: number | string | RelatedField<User> | UserQueryFields
 }`
 
-const expectedSettable =`
+const expectedSettable = `
 interface MembershipSettable {
     team?: number | null | Team | RelatedField<Team>
 }
 `
 
 const expectedBaseClass = `
-class MembershipBase implements MembershipAttributes {
-    id: number
-    level: string
-    teamId: number
-    userId: number
-    createdAt: Date
-    updatedAt: Date
-
-    user: RelatedField<User>
-    static user: QueryField
+export class MembershipBase {
     team: RelatedField<Team>
     static team: QueryField
+    user: RelatedField<User>
+    static user: QueryField
+    
+    id: number
+    static id: QueryField
+    static id__not: QueryField
+    static id__lt: QueryField
+    static id__lte: QueryField
+    static id__gt: QueryField
+    static id__gte: QueryField
+    
+    teamId: number
+    static teamId: QueryField
+    static teamId__not: QueryField
+    static teamId__lt: QueryField
+    static teamId__lte: QueryField
+    static teamId__gt: QueryField
+    static teamId__gte: QueryField
+
+    userId: number
+    static userId: QueryField
+    static userId__not: QueryField
+    static userId__lt: QueryField
+    static userId__lte: QueryField
+    static userId__gt: QueryField
+    static userId__gte: QueryField
+
+    level: string
+    static level: QueryField
+    static level__not: QueryField
+    static level__lt: QueryField
+    static level__lte: QueryField
+    static level__gt: QueryField
+    static level__gte: QueryField
+    
+    createdAt: Date
+    static createdAt: QueryField
+    static createdAt__not: QueryField
+    static createdAt__lt: QueryField
+    static createdAt__lte: QueryField
+    static createdAt__gt: QueryField
+    static createdAt__gte: QueryField
+
+    updatedAt: Date
+    static updatedAt: QueryField
+    static updatedAt__not: QueryField
+    static updatedAt__lt: QueryField
+    static updatedAt__lte: QueryField
+    static updatedAt__gt: QueryField
+    static updatedAt__gte: QueryField
+
 
     // instance methods
-    set: (obj: NonGeneratedMembershipAttributes) => void
+    set: (obj: MembershipSettable) => void
     save: () => Promise<Membership>
 
     // AR methods
     static where: (arg0: MembershipQueryFields) => any
     static join: (arg0: MembershipJoinableFields, arg1?: MembershipQueryFields) => any
     static order: (from: any) => any
-    static find: (from?: any) => Promise<Membership[]>
-    static findOne: (from: any) => Promise<Membership>
+    static find: (from?: MembershipQueryFields) => Promise<Membership[]>
+    static findOne: (from: MembershipQueryFields | ValueType) => Promise<Membership>
 }`
+
+// where should be able to take both
+//     static where: (arg0: MembershipQueryFields) => any
+//     static where: (from: QueryField, to: QueryField | ValueType) => an
 
 test('Should generate types for a membership model', async () => {
     registerModel(User)
@@ -127,7 +182,7 @@ test('Should generate types for a membership model', async () => {
         },
         {
             name: 'team_id',
-            type: 'INTEGER'
+            type: 'INTEGER',
         },
         {
             name: 'user_id',
@@ -135,7 +190,7 @@ test('Should generate types for a membership model', async () => {
         },
         {
             name: 'level',
-            type: 'TEXT'
+            type: 'TEXT',
         },
         {
             name: 'created_at',
@@ -166,21 +221,35 @@ test('Should generate types for a membership model', async () => {
     // @ts-ignore
     const generatedAttributes = generateAttributesForModel(Membership)
 
-    expectEqualNoWhitespace(generatedAttributes.attributesContent, expectedAttributes)
+    expectEqualNoWhitespace(
+        generatedAttributes.attributesContent,
+        expectedAttributes
+    )
 
-    expect(generatedAttributes.joinableFieldsType).toEqual(expectedJoinableFields)
+    expect(generatedAttributes.joinableFieldsType).toEqual(
+        expectedJoinableFields
+    )
 
-    expectEqualNoWhitespace(generatedAttributes.queryFieldsContent, expectedQueryFields)
-    /*
+    expectEqualNoWhitespace(
+        generatedAttributes.queryFieldsContent,
+        expectedQueryFields
+    )
+
     // @ts-ignore
-    const body = generateBodyForModel(Membership, [User, Team, Membership])
+    const body = generateBaseClassForModel(Membership, generatedAttributes)
 
-    expect(body).toEqual(expectedBody)
-     */
+    //expect(body).toEqual(expectedBaseClass)
+    expectEqualNoWhitespace(body, expectedBaseClass)
+
+    // @ts-ignore
+    const everything = generateBodyForModel(Membership)
+
+    // note: so far, we're happy just making sure it doesn't crash. should be improved
+    // maybe just verifying it's non-broken typescript with intact AST?
 })
 
-const expectEqualNoWhitespace = (one, two) => {
-    expect(withoutWhitespace(one)).toEqual(withoutWhitespace(two))
+const expectEqualNoWhitespace = (actual, expected) => {
+    expect(withoutWhitespace(actual)).toEqual(withoutWhitespace(expected))
 }
 
 afterEach(() => {
