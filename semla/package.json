@@ -1,6 +1,6 @@
 {
     "name": "semla",
-    "version": "1.0.0",
+    "version": "0.0.2",
     "license": "MIT",
     "scripts": {
         "dev": "cross-env NODE_ENV=dev nodemon index.js",

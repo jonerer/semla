@@ -179,7 +179,7 @@ const generateTypesContent = (models: ModelType[]) => {
         '// DO make sure to add this to source control; it will not be regenerated in test or production environments\n'
 
     const prelude = `
-    interface RelatedField<T> extends Promise<T> {
+    export interface RelatedField<T> extends Promise<T> {
     id: number
     }
     
