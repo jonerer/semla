@@ -1,6 +1,9 @@
 # semla
 Semla is a server-side Node.js web framework.
 
+# Status
+Semla is no longer being worked on. It was a lot of fun, but took a bit too much time.
+
 ## Features
  - Ergonomic and typesafe ORM (including migrations)
  - Powerful templating
