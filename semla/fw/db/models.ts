@@ -15,6 +15,7 @@ import debug from 'debug'
 const dbg = debug('semla:models')
 
 export interface ModelType {
+    id: Field // id is always required in runtime, and handy for the querybuild to have here
     _fields: Fields
     _relationFields: Field[]
     _modelName: string

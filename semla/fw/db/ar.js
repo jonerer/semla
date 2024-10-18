@@ -198,9 +198,16 @@ export const addARQueryThings = model => {
         }
     }
 
-    model.findOne = async (id, _opts) => {
+    model.findOne = async (conditions, _opts) => {
         const opts = _opts || {}
-        const [completeSql, values] = findOneSql(model, id)
+        const qb = new QueryBuilder()
+        qb.targetModel(model)
+        if (typeof conditions === 'number' || typeof conditions === 'string') {
+            qb.addConditions([model.id, conditions])
+        } else {
+            qb.where(conditions)
+        }
+        const [completeSql, values] = await qb.sql()
 
         if (opts.onlySql) {
             return completeSql

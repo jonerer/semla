@@ -30,10 +30,80 @@ afterAll(() => {
 beforeAll(async () => {
     registerModel(Example)
     makeMock('examples')
+
+    mockAdapter.addModelTableMetadata('users', [
+        {
+            name: 'id',
+            type: 'BIGSERIAL',
+        },
+    ])
+    mockAdapter.addModelTableMetadata('memberships', [
+        {
+            name: 'id',
+            type: 'BIGSERIAL',
+        },
+        {
+            name: 'level',
+            type: 'TEXT',
+        },
+        {
+            name: 'team_id',
+            type: 'INTEGER',
+        },
+        {
+            name: 'user_id',
+            type: 'INTEGER',
+        },
+    ])
+    mockAdapter.addModelTableMetadata('teams', [
+        {
+            name: 'id',
+            type: 'BIGSERIAL',
+        },
+        {
+            name: 'name',
+            type: 'TEXT',
+        },
+        {
+            name: 'creator_id',
+            type: 'INTEGER',
+        },
+    ])
+    registerModel(User)
+    registerModel(Membership)
+    registerModel(Team)
+
     await prepareModels()
 })
 
 class Example {}
+class Membership {
+    static setup(m) {
+        m.belongsTo('team')
+        m.belongsTo('user')
+    }
+
+    static validation(v) {
+        v.present('team')
+    }
+}
+
+class User {
+    static setup(m) {
+        m.hasMany('teams')
+    }
+}
+
+class Team {
+    static setup(m) {
+        m.hasMany('memberships')
+        m.belongsTo('creator', {
+            model: 'User',
+        })
+    }
+
+    static validation(v) {}
+}
 
 test('Should be able to produce IN() queries', async () => {
     const findInSql = await Example.where({
@@ -52,6 +122,40 @@ test('Should be able to produce IN() queries', async () => {
 
     expect(findInSql.split('\n').join(' ')).toBe(
         'SELECT e."id", e."example_field", e."created_at" FROM examples e WHERE e."id" = ANY ($1)'
+    )
+})
+
+/*
+test('Should be able to give \'findOne()\' a whole selector thing', async () => {
+    const findOneSql = await Example.findOne({
+
+    })
+})
+ */
+
+test('Should handle related field querying', async () => {
+    const team = new Team()
+    team.set({
+        id: 1,
+        creatorId: 100,
+    })
+    const memb = await Membership.findOne({ team }, { onlySql: true })
+
+    expect(memb.split('\n').join(' ')).toBe(
+        'SELECT m."id", m."level", m."team_id", m."user_id" FROM memberships m INNER JOIN teams t      ON m.team_id = t.id WHERE t."id" = $1'
+    )
+
+    const someMembership = new Membership()
+    someMembership.set({
+        teamId: 5,
+    })
+    const memb2 = await Membership.find(
+        { user: team.creator },
+        { onlySql: true }
+    )
+
+    expect(memb2.split('\n').join(' ')).toBe(
+        'SELECT m."id", m."level", m."team_id", m."user_id" FROM memberships m INNER JOIN users u      ON m.user_id = u.id WHERE u."id" = $1'
     )
 })
 

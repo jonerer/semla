@@ -15,7 +15,9 @@ const setupBelongsTo = (model: ModelType, relation: CollectedRelation) => {
         model._fields.getByDbName(field.dbName)!.relationField = field
     } catch (e) {
         console.error(e.message, e.stack)
-        throw new Error(`Unable to set up relation field on ${model._modelName}.${field.dbName}. Nested stack:`)
+        throw new Error(
+            `Unable to set up relation field on ${model._modelName}.${field.dbName}. Nested stack:`
+        )
     }
 
     // set up the instance field
@@ -47,6 +49,7 @@ const setupBelongsTo = (model: ModelType, relation: CollectedRelation) => {
                     }
                     return resolve(that._attributes[jsName])
                 },
+                _isBelongsToField: true,
                 sql: findOneSql(otherModel, idVal)[0],
                 id: idVal,
             }

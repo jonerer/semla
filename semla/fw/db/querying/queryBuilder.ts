@@ -34,7 +34,12 @@ export class QueryField {
         const nameToUse = alias + '."' + this.dbName + '"'
         if (this.operator === 'ANY') {
             if (value == null) {
-                throw new Error('You wanted to perform an "IN" query with a NULL value. This behaviour is undefined, and will therefore throw. Field: ' + this.model._modelName + '.' + this.field.jsName)
+                throw new Error(
+                    'You wanted to perform an "IN" query with a NULL value. This behaviour is undefined, and will therefore throw. Field: ' +
+                        this.model._modelName +
+                        '.' +
+                        this.field.jsName
+                )
             }
             return nameToUse + ' = ANY ($' + paramId + ')'
         }
@@ -61,10 +66,16 @@ interface RawQueryCondition {
     [s: string]: any // query condition like "user_id": 5
 }
 
+type JoinType = 'INNER' | 'LEFT' | 'RIGHT'
+
+interface JoinOptions {
+    type: JoinType
+}
+
 export class QueryBuilder {
     private conditions: [QueryField, QueryField | any][]
     // (from, to). To is either a value or a queryfield in the case of relations.
-    private joinFields: [QueryField, RawQueryCondition][] // second item in array is a condition
+    private joinFields: [QueryField, RawQueryCondition, JoinOptions][] // second item in array is a condition
     private aliases: AliasType
     private orderings: [QueryField, 'ASC' | 'DESC'][]
     private limitCount: number
@@ -86,6 +97,30 @@ export class QueryBuilder {
         return fieldNamesJoined
     }
 
+    leftJoin(...conditions) {
+        // just duplicated from join(...conditions)
+        const relation: QueryField = conditions[0]
+        let condition: RawQueryCondition | undefined = undefined
+        if (conditions.length > 1) {
+            condition = conditions[1] as object
+        } else {
+            condition = {}
+        }
+        if (!relation) {
+            throw new Error(
+                "That relation doesn't exist. You probably misspelled something."
+            )
+        }
+        this.joinFields.push([
+            relation,
+            condition,
+            {
+                type: 'LEFT',
+            },
+        ])
+        return this
+    }
+
     join(...conditions) {
         const relation: QueryField = conditions[0]
         let condition: RawQueryCondition | undefined = undefined
@@ -99,7 +134,13 @@ export class QueryBuilder {
                 "That relation doesn't exist. You probably misspelled something."
             )
         }
-        this.joinFields.push([relation, condition])
+        this.joinFields.push([
+            relation,
+            condition,
+            {
+                type: 'INNER',
+            },
+        ])
         return this
     }
 
@@ -130,7 +171,7 @@ export class QueryBuilder {
         for (const modelName of Object.keys(allModelNames)) {
             const model = getLowercasedModel(modelName)
             if (!model) {
-                throw new Error("No such model " + modelName)
+                throw new Error('No such model ' + modelName)
             }
             const firstChar = model._tableName.charAt(0)
 
@@ -155,25 +196,28 @@ export class QueryBuilder {
         // https://stackoverflow.com/questions/8779918/postgres-multiple-joins
         let joinTables: string[] = []
         for (const join of this.joinFields) {
-            const [joinField, joinConditions] = join
+            const [joinField, joinConditions, joinType] = join
             const myModel = joinField.model
             const myModelAlias = this.getAlias(myModel)
 
             const relation = joinField.relation
             if (!relation) {
-                throw new Error("Internal semla error: unable to join relation")
+                throw new Error('Internal semla error: unable to join relation')
             }
             const otherModel = relation.targetModel
             if (!otherModel) {
-                throw new Error("Internal semla error: unable to join relation: other model is null")
+                throw new Error(
+                    'Internal semla error: unable to join relation: other model is null'
+                )
             }
             const otherTableAlias = this.getAlias(otherModel)
 
             if (relation.type === 'belongsTo') {
                 joinTables.push(
-                    `JOIN ${otherModel._tableName} ${otherTableAlias} \n` +
+                    `${joinType.type} JOIN ${otherModel._tableName} ${otherTableAlias} \n` +
                         `    ON ${myModelAlias}.${relation.dbName} = ${otherTableAlias}.id`
                 )
+                // should hasMany really be a join? and not a secondary query
             } else if (relation.type === 'hasMany') {
                 joinTables.push(
                     `JOIN ${otherModel._tableName} ${otherTableAlias} \n` +
@@ -207,7 +251,10 @@ export class QueryBuilder {
                 const [field, value] = condition
                 // find what model the field lives on, and what it's alias in this query is
                 if (!field.model) {
-                    throw new Error('Unable to generate query, model is missing for field ' + JSON.stringify(field))
+                    throw new Error(
+                        'Unable to generate query, model is missing for field ' +
+                            JSON.stringify(field)
+                    )
                 }
                 const alias = this.getAlias(field.model)
                 const conditionSql = field.sql(alias, value, paramIdx)
@@ -359,8 +406,8 @@ export class QueryBuilder {
         let field: QueryField
         let value: any = undefined
         if (param.length === 2) {
-            [rawField, value] = param
-        }else {
+            ;[rawField, value] = param
+        } else {
             /* if it's an object like
             { memberId: 5, somethingElse: 2 }
             Then instead recurse this method with
@@ -372,25 +419,55 @@ export class QueryBuilder {
                 if (typeof value === 'object' && !Array.isArray(value)) {
                     /*
                     This means it's an object like
-                    { member: { id: 5, email: '...' } }
+                    { member: { id: 5, email: 'some_email' } }
+                    OR
+                    { member: <membership model instance> }
                     We should turn that into (in this case the "member" relation points to a user)
                     [ User.id, 5], [ User.level, '...']
                      */
                     const targetRelation: QueryField = this.model[key]
                     if (!targetRelation) {
-                        throw new Error('You tried to join from model ' + this.model._modelName + ' via relation "' + key + '", but no such relation exists')
+                        throw new Error(
+                            'You tried to join from model ' +
+                                this.model._modelName +
+                                ' via relation "' +
+                                key +
+                                '", but no such relation exists'
+                        )
                     }
                     const targetModel = targetRelation.relation!.targetModel
+
+                    if (!targetModel) {
+                        throw new Error(
+                            `It seems that the relation from model ${this.model._modelName} called ${targetRelation.relation?.jsName} was not set up correctly`
+                        )
+                    }
 
                     // is this query already joined via the targetRelation? If not, make sure to add it
                     if (!this.isJoinedWith(targetRelation)) {
                         this.join(targetRelation)
                     }
 
-                    for (const joinFieldKey of Object.keys(value)) {
-                        const targetModelQueryField = targetModel![joinFieldKey]
-                        const targetValue = value[joinFieldKey]
-                        this.addCondition([targetModelQueryField, targetValue])
+                    // is this a model instance? then just use the ID
+                    if (value._modelName !== undefined) {
+                        this.addConditions([targetModel.id, value.id])
+                    } else if (value._isBelongsToField) {
+                        // this is a related field? Like { user: membership.user } then get the id
+                        this.addCondition([targetModel.id, value.id])
+                    } else {
+                        /* otherwise it's a object with a lot of stuff like
+                        user { email: 'blah', username: 'bleh blah' }, then add all of them
+                         */
+                        for (const joinFieldKey of Object.keys(value)) {
+                            const targetModelQueryField = targetModel![
+                                joinFieldKey
+                            ]
+                            const targetValue = value[joinFieldKey]
+                            this.addCondition([
+                                targetModelQueryField,
+                                targetValue,
+                            ])
+                        }
                     }
                 } else {
                     this.addCondition([key, value])
@@ -404,6 +481,7 @@ export class QueryBuilder {
         } else if (typeof rawField === 'string') {
             field = this.model[rawField]
         } else {
+            debugger
             throw new Error('Internal error, sorry')
         }
         if (field === undefined) {
