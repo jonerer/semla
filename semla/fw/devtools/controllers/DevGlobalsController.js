@@ -1,5 +1,5 @@
 import { registerController } from '../../fw'
-import { getModels } from '../../db/models'
+import { getModels } from '../../db/models.js'
 import { getGlobals } from '../../globals'
 
 class DevGlobalsController {

@@ -1,4 +1,4 @@
-import { registerSerializer, serialize } from '../../fw/db/serialization'
+import { registerSerializer, serialize } from '../../fw/db/serialization.js'
 
 class SimpleUserSerializer {
     async one(user) {

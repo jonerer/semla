@@ -1,4 +1,4 @@
-import { registerModel } from '../../db/models'
+import { registerModel } from '../../db/models.js'
 import { DevBaseModel } from './DevBaseModel'
 
 export class DevLoggedRequest extends DevBaseModel {

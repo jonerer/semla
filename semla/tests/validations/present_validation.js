@@ -1,5 +1,5 @@
-import { ValidationCollector } from '../../fw/db/validation/collection'
-import { ValidationRunner } from '../../fw/db/validation/validators'
+import { ValidationCollector } from '../../fw/db/validation/collection.js'
+import { ValidationRunner } from '../../fw/db/validation/validators.js'
 import { MockDbAdapter } from '../../fw/db/adapters'
 import {
     clearModels,
@@ -7,7 +7,7 @@ import {
     prepareModels,
     registerModel,
     setDbAdapter,
-} from '../../fw/db/models'
+} from '../../fw/db/models.js'
 
 class TestUser {
     static setup(m) {

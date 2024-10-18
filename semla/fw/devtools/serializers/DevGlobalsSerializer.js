@@ -1,4 +1,4 @@
-import { registerSerializer } from '../../db/serialization'
+import { registerSerializer } from '../../db/serialization.js'
 
 class DevGlobalsSerializer {
     async one(item, { add }) {

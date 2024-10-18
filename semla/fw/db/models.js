@@ -6,7 +6,7 @@ import { addARQueryThings } from './ar'
 import { findOneSql } from './querying/utils'
 import { Field, Fields } from './querying/fields'
 import { setupRelations } from './querying/relations'
-import { ValidationCollector } from './validation/collection'
+import { ValidationCollector } from './validation/collection.js'
 import { ModelSetupCollector } from './models/collector'
 import { addGlobal } from '../globals'
 import getCallerFile from 'get-caller-file'
@@ -14,31 +14,35 @@ import debug from 'debug'
 
 const dbg = debug('semla:models')
 
-export interface ModelType {
-    _fields: Fields
-    _relationFields: Field[]
-    _modelName: string
-    prototype: any
-    _routeParamName: string
-    _setup: ModelSetupCollector
-    _tableName: string
-    _validations: ValidationCollector
-    _loaded: boolean
-    _registeringPath: string
-    loaded(): boolean
+/**
+ * /**
+ *  * Represents the structure of a ModelType object. This is primarily used internally within the framework.
+ *  this was generated, could be wrong.
+ *   @typedef {Object} ModelType
+ *   @property {Fields} _fields - Object containing fields of the model.
+ *   @property {Field[]} _relationFields - Array of relation fields related to this model.
+ *   @property {string} _modelName - The name of the model.
+ *   @property {any} prototype - Prototype for instances of this model.
+ *   @property {string} _routeParamName - Parameter name used in route URLs.
+ *   @property {ModelSetupCollector} _setup - A collector object used to set up the model.
+ *   @property {string} _tableName - The name of the table in the database associated with the model.
+ *   @property {ValidationCollector} _validations - A collector object that handles validation for this model.
+ *   @property {boolean} _loaded - Indicates if the model has been loaded.
+ *   @property {string} _registeringPath - The path where the model is registered.
+ *   @property {boolean} loaded - Indicates whether the model has been fully loaded. Returns `true` if fully loaded, otherwise `false`.
+ *
+ // some AR things.
+ // note: these are not the AR types that the end-user will see
+ // just dummy typings that are good enough for framework-internal use
+ *   @property {Function} findOne - A placeholder method for finding a single record.
+ *   @property {Function} find - A placeholder method for finding multiple records.
+ */
 
-    // some AR things.
-    // note: these are not the AR types that the end-user will see
-    // just dummy typings that are good enough for framework-internal use
-    findOne(any): any
-    find(any): any
-}
-
-interface ModelsType {
-    [s: string]: ModelType
-}
-
-export interface ModelInstance {} // this one is not use in runtime. (yet?)
+/**
+ * Represents the structure of a ModelsType object. This is primarily used internally within the framework.
+ * @typedef {Object.<string, ModelType>} ModelsType
+ * @description Object where each property key is a string, and the value is a ModelType.
+ */
 
 export const assureBucket = obj => {
     if (!obj._dirtyKeys) {
@@ -109,7 +113,9 @@ export const getLowercasedModel = name => {
 
 const prepareFiller = model => {
     let fillableFields = model._setup.fillable_fields
-    let fillables: string[] = []
+
+    /** @type {string[]} */
+    let fillables = []
     if (!Array.isArray(fillableFields)) {
         fillables = [fillableFields]
     } else {
@@ -137,7 +143,11 @@ export const collectSetup = model => {
     model._setup = collector
 }
 
-const addQueryProperties = (model: ModelType, field: Field) => {
+/**
+ * @param {ModelType} model
+ * @param {Field} field
+ * */
+const addQueryProperties = (model, field) => {
     // attach User.id and the like, for querying purposes
 
     const qf = new QueryField(model, field, '=')
@@ -245,7 +255,8 @@ export const prepareModels = async () => {
             return toRet
         }
 
-        const fields: Field[] = []
+        /** @type {Field[]} */
+        const fields = []
         // add getters and setters for the fields
 
         for (const rawField of metadataRes) {
@@ -283,7 +294,8 @@ export const prepareModels = async () => {
     dbg(`Model preparation done`)
 }
 
-export const models: ModelsType = {}
+/** @type {ModelsType} */
+export const models = {}
 
 export function registerModel(model) {
     model._registeringPath = getCallerFile()
@@ -295,7 +307,8 @@ export function clearModels() {
     Object.keys(models).forEach(x => delete models[x])
 }
 
-export function getUserModels(): ModelsType {
+/** @returns {ModelsType} */
+export function getUserModels() {
     // filter out all models starting with 'dev'
     const keys = Object.keys(models).filter(
         x => !x.toLowerCase().startsWith('dev')
@@ -307,9 +320,12 @@ export function getUserModels(): ModelsType {
     return newObj
 }
 
-export function getLoadedUserModelList(): ModelType[] {
+/** @returns {ModelType[]} */
+export function getLoadedUserModelList() {
     const models = getUserModels()
-    let modelList: ModelType[] = []
+
+    /** @type {ModelType[]} */
+    let modelList = []
     for (const model of Object.values(models)) {
         const isLoaded = model.loaded && model.loaded()
         if (isLoaded) {

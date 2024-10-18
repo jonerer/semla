@@ -4,7 +4,7 @@ import {
     prepareModels,
     registerModel,
     setDbAdapter,
-} from '../../fw/db/models'
+} from '../../fw/db/models.js'
 import { MockDbAdapter } from '../../fw/db/adapters'
 
 // https://devhints.io/knex is really cool. I should have something like that.

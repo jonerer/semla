@@ -1,21 +1,29 @@
-import { getModels, getUserModels, ModelType } from './models'
+import { getUserModels, ModelType } from './models'
 import get from '../config/config'
 import { getAppBasedir } from '../appinfo'
 import { readFileSync, writeFileSync, mkdirSync } from 'fs'
 import { prettierify } from '../devtools/services/Prettierify'
 
-interface Attributes {
-    settableName: string
-    settableContent: string
-    attributesName: string
-    attributesContent: string
-    joinableFieldsName: string
-    joinableFieldsType: string
-    queryFieldsName: string
-    queryFieldsContent: string
-}
+/*
+ * This file generates typescript types for the models in the application.
+ * It might be removed, if I go all in on jsdoc.
+ */
+/** @typedef {Object} Attributes
+ * @property {string} settableName
+ * @property {string} settableContent
+ * @property {string} attributesName
+ * @property {string} attributesContent
+ * @property {string} joinableFieldsName
+ * @property {string} joinableFieldsType
+ * @property {string} queryFieldsName
+ * @property {string} queryFieldsContent
+ */
 
-export const generateAttributesForModel = (model: ModelType): Attributes => {
+/** Generate the attributes for a model
+ * @param {ModelType} model
+ * @returns {Attributes}
+ */
+export const generateAttributesForModel = model => {
     let all = model._fields.getAll()
 
     const settableName = model._modelName + 'Settable'
@@ -82,7 +90,8 @@ export const generateAttributesForModel = (model: ModelType): Attributes => {
     }
     queryFieldsContent += '}\n'
 
-    const attrs: Attributes = {
+    /** @type {Attributes} */
+    const attrs = {
         settableName,
         settableContent,
         attributesName,
@@ -95,10 +104,12 @@ export const generateAttributesForModel = (model: ModelType): Attributes => {
     return attrs
 }
 
-export const generateBaseClassForModel = (
-    model: ModelType,
-    attributes: Attributes
-) => {
+/** Generate the base class for a model
+ * @param {ModelType} model
+ * @param {Attributes} attributes
+ * @returns {string}
+ */
+export const generateBaseClassForModel = (model, attributes) => {
     let modelBody = 'export class ' + model._modelName + 'Base {\n'
     let all = model._fields.getAll()
     for (const field of model._relationFields) {
@@ -151,7 +162,11 @@ export const generateBaseClassForModel = (
     return modelBody
 }
 
-export const generateBodyForModel = (model: ModelType) => {
+/** Generate the body for a model
+ * @param {ModelType} model
+ * @returns {string}
+ */
+export const generateBodyForModel = model => {
     const attributes = generateAttributesForModel(model)
     const baseClass = generateBaseClassForModel(model, attributes)
     let body = ''
@@ -168,7 +183,11 @@ const useMoment = () => {
     return true
 }
 
-const generateTypesContent = (models: ModelType[]) => {
+/** Generate the content for the types file
+ * @param {ModelType[]} models
+ * @returns {string}
+ */
+const generateTypesContent = models => {
     // make a little prelude
     // for each model, create a string for the interface, one for the import
 
@@ -233,7 +252,8 @@ export interface RequestContext {
 }
     `
 
-    let modelsToImport: string[] = []
+    /** @type {string[]} */
+    let modelsToImport = []
     let imports = ``
 
     if (useMoment()) {
@@ -250,7 +270,8 @@ export interface RequestContext {
         modelsBody += modelBody + '\n'
     }
 
-    let hasImported: string[] = []
+    /** @type {string[]} */
+    let hasImported = []
     for (const impo of modelsToImport) {
         if (hasImported.indexOf(impo) !== -1) {
             continue
@@ -275,7 +296,11 @@ export interface RequestContext {
     return s
 }
 
-function getCurrentContent(targetFilePath: string) {
+/** Get the current content of the types file
+ * @param {string} targetFilePath
+ * @returns {string}
+ */
+function getCurrentContent(targetFilePath) {
     try {
         return readFileSync(targetFilePath, 'utf-8')
     } catch (e) {
@@ -283,7 +308,11 @@ function getCurrentContent(targetFilePath: string) {
     }
 }
 
-function writeNewContent(targetFilePath: string, content: string) {
+/** Write new content to the types file
+ * @param {string} targetFilePath
+ * @param {string} content
+ */
+function writeNewContent(targetFilePath, content) {
     writeFileSync(targetFilePath, content, 'utf-8')
 }
 
@@ -291,7 +320,9 @@ export const generateTypes = async () => {
     const shouldGenModels = get('codegen.models')
     if (shouldGenModels) {
         const models = getUserModels()
-        let modelList: ModelType[] = []
+
+        /** @type {ModelType[]} */
+        let modelList = []
         let anyNotLoaded = false
         for (const model of Object.values(models)) {
             modelList.push(model)

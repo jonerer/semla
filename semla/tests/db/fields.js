@@ -3,7 +3,7 @@ import {
     prepareModels,
     registerModel,
     setDbAdapter,
-} from '../../fw/db/models'
+} from '../../fw/db/models.js'
 import { MockDbAdapter } from '../../fw/db/adapters'
 import { jsifyBody } from '../../fw/middlewares'
 

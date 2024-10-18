@@ -1,3 +1,7 @@
+/*
+
+This was an experiment to build some kind of "native components". paused for now.
+
 import path from 'path'
 import fs, { promises as fsPromises } from 'fs'
 import { getAppBasedir } from '../appinfo'
@@ -60,3 +64,5 @@ export const initDevBundler = async () => {
 
     // console.log('done bundling!', bundle)
 }
+
+ */

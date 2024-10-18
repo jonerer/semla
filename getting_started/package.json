@@ -4,10 +4,11 @@
     "license": "MIT",
     "scripts": {
         "dev": "cross-env NODE_ENV=dev nodemon index.js",
-        "migrate": "node migrate.js",
+        "migrate": "node migrate.ts",
         "test": "jest --runInBand",
         "test-watch": "jest --watch --runInBand"
     },
+    "type": "module",
     "main": "index.js",
     "dependencies": {
         "@babel/preset-env": "^7.11.0",

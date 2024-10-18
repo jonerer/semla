@@ -1,6 +1,6 @@
 import { registerModel } from '../../fw/fw'
 import { MockDbAdapter } from '../../fw/db/adapters'
-import { prepareModels, setDbAdapter } from '../../fw/db/models'
+import { prepareModels, setDbAdapter } from '../../fw/db/models.js'
 
 class BaseModel {}
 

@@ -1,6 +1,6 @@
 import { GenerationService } from '../../fw/devtools/services/GenerationService'
 import { finish, startup } from '../../fw/testing/testutils'
-import { prepareModels, registerModel, setDbAdapter } from '../../fw/db/models'
+import { prepareModels, registerModel, setDbAdapter } from '../../fw/db/models.js'
 import { MockDbAdapter } from '../../fw/db/adapters'
 import { DevFileChange } from '../../fw/devtools/models/DevFileChange'
 

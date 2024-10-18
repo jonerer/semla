@@ -1,6 +1,6 @@
 import express from 'express'
-import { prepareModels } from './db/models'
-import { registerModelsAsQueryParams } from './db/models'
+import { prepareModels } from './db/models.js'
+import { registerModelsAsQueryParams } from './db/models.js'
 import * as bodyParser from 'body-parser'
 import { close } from './db/db'
 import { isNonProd, isNonTest } from './appinfo'
@@ -8,13 +8,13 @@ import { runMigrations } from './db/migrations/migration'
 import { load as loadSessions } from './web/sessions'
 
 export { registerController } from './controllers/setup'
-export { registerModel } from './db/models'
+export { registerModel } from './db/models.js'
 export { registerRoutes } from './routes/routes'
 export { setAppBasedir as setBasedir } from './appinfo'
 export { requireParams } from './middlewares'
 import * as dotenv from 'dotenv'
 export { registerInitializer } from './initialize/startup'
-export { registerSerializer } from './db/serialization'
+export { registerSerializer } from './db/serialization.js'
 
 export { ModelSetupCollector } from './db/models/collector'
 export { MigrationCollector } from './db/migrations/collector'
@@ -34,8 +34,8 @@ import { initDevBundler } from './client/devbundler'
 import { hostStatic } from './static.js'
 import { initLiveReload } from './devtools/livereload'
 import { applyDefaultConfig } from './config/defaults'
-import { generateTypes } from './db/typegen'
-import { generateDescriptions } from './db/descriptiongen'
+import { generateTypes } from './db/typegen.js'
+import { generateDescriptions } from './db/descriptiongen.js'
 
 import debug from 'debug'
 
@@ -53,7 +53,8 @@ const setupEnv = () => {
     }
 
     if (envShortName() === 'dev') {
-        initDevBundler()
+        // work in progress, maybe scrapped.
+        //initDevBundler()
     }
 
     if (isNonProd()) {

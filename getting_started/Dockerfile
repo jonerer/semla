@@ -17,7 +17,7 @@ ENV PORT=3000
 RUN npm install && npm cache clean --force --loglevel=error
 
 COPY --chown=node:node index.js .
-COPY --chown=node:node migrate.js .
+COPY --chown=node:node migrate.ts .
 COPY --chown=node:node tsconfig.json .
 COPY --chown=node:node babel.config.js .
 COPY --chown=node:node index.js .

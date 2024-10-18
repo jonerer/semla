@@ -1,8 +1,8 @@
 import { query } from './db'
 import { QueryBuilder } from './querying/queryBuilder'
 import { findOneSql } from './querying/utils'
-import { ValidationRunner } from './validation/validators'
-import { ValidationCollector } from './validation/collection'
+import { ValidationRunner } from './validation/validators.js'
+import { ValidationCollector } from './validation/collection.js'
 import { Query } from 'pg'
 
 export function instantiateFromDbRow(model, row) {

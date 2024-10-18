@@ -21,16 +21,13 @@ export const registerSerializer = serializer => {
     serializers[normalized] = serializer
 }
 
-// https://www.typescriptlang.org/docs/handbook/generics.html
-// https://www.typescriptlang.org/docs/handbook/advanced-types.html
-export class SerializerCollector<T> {
-    fieldsToResolve: string[]
-    objsGiven: {}
-    fieldsToStringify: string[]
-
+export class SerializerCollector {
     constructor() {
+        /** @type {string[]} */
         this.fieldsToResolve = []
+        /** @type {object} */
         this.objsGiven = {}
+        /** @type {string[]} */
         this.fieldsToStringify = []
 
         // bind this in case someone destructures the collector
@@ -38,7 +35,15 @@ export class SerializerCollector<T> {
         this.addString = this.addString.bind(this)
     }
 
-    add(...args: object[] | (keyof T)[]) {
+    /** Add fields to serialize.
+     * Can be:
+     *  - a string of a field name, like "username"
+     *  - an array of field names, like ["username", "email"]
+     *  - an object, like { username: "John" }. I don't really remember what that does though :D Looks like it's just merged into the result? weird.
+     *
+     * @param {object | string | string[]} args
+     * */
+    add(...args) {
         const obj = args[0]
         if (args.length > 1) {
             for (const o of args) {
@@ -60,7 +65,15 @@ export class SerializerCollector<T> {
         }
     }
 
-    addString(obj: keyof T | (keyof T)[]) {
+    /** Add fields to stringify.
+     * The only difference between this and the former method is that this will stringify the values.
+     *
+     * Can be:
+     * - a string of a field name, like "id"
+     * - an array of field names, like ["username", "email"]
+     * @param obj
+     */
+    addString(obj) {
         // @ts-ignore
         this.add(obj)
 
@@ -136,7 +149,13 @@ const findDefaultSerializerName = hej => {
     return serializerName
 }
 
-export const serialize = async (hej, desiredSerializer?: string) => {
+/** Serialize a model or an array of models.
+ * If a model is a thenable, it will be resolved first.
+ *
+ * @param hej
+ * @param {string?} desiredSerializer
+ */
+export const serialize = async (hej, desiredSerializer) => {
     if (hej && hej.then) {
         // if hej is a thenable, then let's resolve it first
         hej = await hej
@@ -149,7 +168,8 @@ export const serialize = async (hej, desiredSerializer?: string) => {
         return hej
     }
 
-    let serializerToUse: null | any = null
+    /** @type {null | any} */
+    let serializerToUse = null
     let needsSerializer = true
     if (desiredSerializer) {
         const splitted = desiredSerializer.toLowerCase().split('serializer')

@@ -1,4 +1,4 @@
-import { registerSerializer } from '../../fw/db/serialization'
+import { registerSerializer } from '../../fw/db/serialization.js'
 
 class UserSerializer {
     /*

@@ -1,5 +1,7 @@
-const fw = require('./lib/fw.js')
-const test = require('./lib/testing/testutils')
+import fw from './fw/fw.js'
+import test from './lib/testing/testutils.js'
+//const fw = require('./fw/fw')
+//const test = require('./lib/testing/testutils')
 
 module.exports = {
     registerController: fw.registerController,

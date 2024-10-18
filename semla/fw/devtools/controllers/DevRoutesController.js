@@ -1,5 +1,5 @@
 import { registerController } from '../../fw'
-import { getModels } from '../../db/models'
+import { getModels } from '../../db/models.js'
 import { generateRoutes } from '../../routes/routes'
 
 class DevRoutesController {
