@@ -18,29 +18,10 @@ import ModelList from './pages/ModelList'
 import LoggedRequests from './pages/LoggedRequests'
 import DbQuery, { DbQueryPage } from './pages/DbQuery'
 import Sidemenu from './shared/sidemenu'
-import styled from 'styled-components/macro'
-
-const DocRoutes = () => {
-    return (
-        <>
-            <Route path="/getting_started/routing">
-                <Routing />
-            </Route>
-            <Route path="/getting_started/templates">
-                <Templates />
-            </Route>
-            <Route exact path="/getting_started/models">
-                <Models />
-            </Route>
-            <Route path="/getting_started/why">
-                <Why />
-            </Route>
-        </>
-    )
-}
+import styled from 'styled-components'
 
 const AppLayout = styled.div`
-        display: flex;
+    display: flex;
 `
 
 const PageContainer = styled.div`
@@ -56,40 +37,51 @@ function App() {
                 <Sidemenu />
 
                 <PageContainer>
-                <Switch>
-                    <Route path="/globals">
-                        <Globals />
-                    </Route>
-                    <Route path="/requests">
-                        <LoggedRequests />
-                    </Route>
-                    <Route path="/generate">
-                        <GeneratePage />
-                    </Route>
-                    <Route path="/routes/list">
-                        <List />
-                    </Route>
-                    <Route exact path="/migrations">
-                        <IndexPage />
-                    </Route>
-                    <Route path="/migrations/create">
-                        <MigrationsCreate />
-                    </Route>
-                    <Route path="/loader">
-                        <Loader />
-                    </Route>
-                    <Route path="/models">
-                        <ModelList />
-                    </Route>
-                    <Route path="/config">
-                        <ConfigList />
-                    </Route>
-                    <Route path="/db_query">
-                        <DbQueryPage />
-                    </Route>
+                    <Switch>
+                        <Route path="/globals">
+                            <Globals />
+                        </Route>
+                        <Route path="/requests">
+                            <LoggedRequests />
+                        </Route>
+                        <Route path="/generate">
+                            <GeneratePage />
+                        </Route>
+                        <Route path="/routes/list">
+                            <List />
+                        </Route>
+                        <Route exact path="/migrations">
+                            <IndexPage />
+                        </Route>
+                        <Route path="/migrations/create">
+                            <MigrationsCreate />
+                        </Route>
+                        <Route path="/loader">
+                            <Loader />
+                        </Route>
+                        <Route path="/models">
+                            <ModelList />
+                        </Route>
+                        <Route path="/config">
+                            <ConfigList />
+                        </Route>
+                        <Route path="/db_query">
+                            <DbQueryPage />
+                        </Route>
 
-                    <DocRoutes />
-                </Switch>
+                        <Route path="/getting_started/routing">
+                            <Routing />
+                        </Route>
+                        <Route path="/getting_started/templates">
+                            <Templates />
+                        </Route>
+                        <Route exact path="/getting_started/models">
+                            <Models />
+                        </Route>
+                        <Route path="/getting_started/why">
+                            <Why />
+                        </Route>
+                    </Switch>
                 </PageContainer>
             </Router>
         </AppLayout>
